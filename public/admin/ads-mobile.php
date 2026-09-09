@@ -503,6 +503,18 @@ if (!$anyActive) {
 <div class="ads2-slot-arrow"><?= am_icon('arrow', 17) ?></div>
 </a>
 
+<a class="ads2-slot-card ads3-fp-card" href="/admin/full-player-ads.php">
+<div class="ads2-slot-icon"><?= am_icon('play', 20) ?></div>
+<div class="ads2-slot-copy">
+    <strong>Full Player /f/</strong>
+    <span>Monetisasi khusus /f/ — terpisah total dari iklan reguler di atas.</span>
+</div>
+<div class="ads2-slot-state <?= ($fullEnabled && $fullHasCode) ? 'live' : ($fullEnabled ? 'empty' : 'off') ?>">
+    <?= ($fullEnabled && $fullHasCode) ? 'LIVE CODE' : ($fullEnabled ? 'EMPTY' : 'OFF') ?>
+</div>
+<div class="ads2-slot-arrow"><?= am_icon('arrow', 17) ?></div>
+</a>
+
 <a class="ads2-slot-card" href="/admin/meta-verification.php">
 <div class="ads2-slot-icon"><?= am_icon('globe', 20) ?></div>
 <div class="ads2-slot-copy"><strong>Meta Verifikasi</strong><span>Google, Bing, jaringan iklan, dan layanan lainnya.</span></div>
