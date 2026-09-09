@@ -1,0 +1,27 @@
+# Secrets — never commit real credentials
+.env
+
+# Runtime state written by the app
+storage/logs/
+storage/cache/
+storage/bot/
+storage/*.tmp.*
+
+# User-uploaded media
+public/uploads/
+public/thumbnails/
+
+# Backup / patch artefacts (previously committed by hand — keep them out)
+*.bak
+*.bak-*
+*.orig
+*.rej
+backup-*/
+apply-*.py
+
+# Python / editor / OS noise
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+*.swp

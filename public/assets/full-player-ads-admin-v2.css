@@ -1,0 +1,136 @@
+/* Full Player Ads Admin V2 */
+
+.fpa-back svg{
+    transform:rotate(180deg);
+}
+
+.fpa-hero{
+    margin-bottom:12px;
+}
+
+.fpa-hero h1{
+    margin:5px 0 0;
+    font-size:25px;
+    line-height:1.1;
+}
+
+.fpa-hero p{
+    margin:7px 0 0;
+    color:var(--am-muted);
+    font-size:8px;
+    line-height:1.45;
+}
+
+.fpa-card{
+    margin-bottom:10px;
+    padding:12px;
+    background:var(--am-surface);
+    border:1px solid var(--am-border);
+    border-radius:14px;
+}
+
+.fpa-master{
+    padding:5px 12px;
+}
+
+.fpa-card-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:10px;
+}
+
+.fpa-card-head strong{
+    display:block;
+    font-size:10px;
+}
+
+.fpa-card-head span{
+    display:block;
+    margin-top:4px;
+    color:var(--am-muted);
+    font-size:7px;
+    line-height:1.35;
+}
+
+.fpa-switch input{
+    width:20px;
+    height:20px;
+}
+
+.fpa-card textarea{
+    width:100%;
+    padding:10px;
+    color:var(--am-text);
+    background:#0D1014;
+    border:1px solid var(--am-border);
+    border-radius:10px;
+    outline:0;
+    resize:vertical;
+    font:inherit;
+    font-size:8px;
+    line-height:1.45;
+}
+
+.fpa-help{
+    margin-top:7px;
+    color:var(--am-muted);
+    font-size:7px;
+}
+
+.fpa-inline-field{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:9px;
+}
+
+.fpa-inline-field label{
+    color:var(--am-muted);
+    font-size:8px;
+}
+
+.fpa-inline-field select{
+    min-width:110px;
+    padding:8px;
+    color:var(--am-text);
+    background:#0D1014;
+    border:1px solid var(--am-border);
+    border-radius:9px;
+    font-size:8px;
+}
+
+.fpa-warning{
+    display:grid;
+    gap:4px;
+    margin:12px 0;
+    padding:11px;
+    background:rgba(234,184,77,.055);
+    border:1px solid rgba(234,184,77,.15);
+    border-radius:11px;
+}
+
+.fpa-warning strong{
+    color:var(--am-gold);
+    font-size:8px;
+}
+
+.fpa-warning span{
+    color:var(--am-muted);
+    font-size:7px;
+    line-height:1.45;
+}
+
+.fpa-save{
+    width:100%;
+    min-height:45px;
+    margin-bottom:10px;
+    color:#17120A;
+    background:var(--am-gold);
+    border:0;
+    border-radius:11px;
+    font-size:9px;
+    font-weight:900;
+}

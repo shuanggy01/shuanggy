@@ -1,0 +1,214 @@
+*{
+    box-sizing:border-box;
+}
+
+html{
+    color-scheme:dark;
+}
+
+body{
+    margin:0;
+    color:#F7F8FA;
+    background:#0F1115;
+    font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+}
+
+a{
+    color:inherit;
+    text-decoration:none;
+}
+
+.cp-header{
+    min-height:72px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:10px 18px;
+    background:#0B0D10;
+    border-bottom:1px solid #272D35;
+}
+
+.cp-brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.cp-brand img{
+    width:42px;
+    height:42px;
+    object-fit:cover;
+    border-radius:50%;
+}
+
+.cp-brand strong{
+    font-size:18px;
+}
+
+.cp-home{
+    padding:10px 12px;
+    color:#98A2B3;
+    background:#171B21;
+    border:1px solid #272D35;
+    border-radius:11px;
+    font-size:12px;
+}
+
+.cp-main{
+    width:min(1180px,100%);
+    margin:0 auto;
+    padding:22px 18px 50px;
+}
+
+.cp-hero{
+    padding:20px;
+    margin-bottom:18px;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(234,184,77,.07),
+            rgba(25,30,37,.7)
+        );
+    border:1px solid #272D35;
+    border-radius:18px;
+}
+
+.cp-eyebrow{
+    color:#EAB84D;
+    font-size:11px;
+    font-weight:900;
+    letter-spacing:1.5px;
+}
+
+.cp-hero h1{
+    margin:8px 0 0;
+    font-size:30px;
+    line-height:1.15;
+}
+
+.cp-hero p{
+    max-width:760px;
+    margin:10px 0 0;
+    color:#AAB2BF;
+    font-size:14px;
+    line-height:1.65;
+}
+
+.cp-meta{
+    display:flex;
+    gap:8px;
+    margin-top:15px;
+}
+
+.cp-meta span{
+    padding:6px 9px;
+    color:#EAB84D;
+    background:rgba(234,184,77,.07);
+    border:1px solid rgba(234,184,77,.13);
+    border-radius:999px;
+    font-size:11px;
+    font-weight:800;
+}
+
+.cp-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+}
+
+.cp-card{
+    min-width:0;
+    padding:8px;
+    background:#1A1F26;
+    border:1px solid #272D35;
+    border-radius:14px;
+}
+
+.cp-thumb{
+    position:relative;
+    overflow:hidden;
+    aspect-ratio:16/9;
+    background:#090B0E;
+    border-radius:10px;
+}
+
+.cp-thumb img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.cp-play{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:44px;
+    height:44px;
+    display:grid;
+    place-items:center;
+    transform:translate(-50%,-50%);
+    color:#17120A;
+    background:#EAB84D;
+    border-radius:50%;
+    font-size:17px;
+}
+
+.cp-card > strong{
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    overflow:hidden;
+    margin-top:9px;
+    font-size:13px;
+    line-height:1.35;
+}
+
+.cp-card > span{
+    display:block;
+    margin-top:6px;
+    color:#98A2B3;
+    font-size:10px;
+}
+
+.cp-empty{
+    grid-column:1/-1;
+    padding:24px;
+    color:#98A2B3;
+    text-align:center;
+    background:#1A1F26;
+    border:1px solid #272D35;
+    border-radius:14px;
+}
+
+@media(min-width:720px){
+    .cp-grid{
+        grid-template-columns:repeat(3,minmax(0,1fr));
+    }
+}
+
+@media(min-width:980px){
+    .cp-grid{
+        grid-template-columns:repeat(4,minmax(0,1fr));
+    }
+}
+
+/* ─── Fix banner iklan tengah ─── */
+.ad-slot { text-align:center; display:block; width:100%; }
+.ad-slot__code { display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; overflow:hidden; }
+.ad-slot__code > * { margin-left:auto !important; margin-right:auto !important; max-width:100% !important; }
+
+/* Fix mobile — batasi container saja */
+@media (max-width: 720px) {
+    .cp-header, .cp-main, .cp-hero {
+        max-width: 100vw;
+        box-sizing: border-box;
+    }
+}

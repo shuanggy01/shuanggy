@@ -1,0 +1,17 @@
+{
+    "enabled": false,
+    "auto_import": false,
+    "start_after_video_id": 0,
+    "providers": {
+        "lulustream": {
+            "enabled": true,
+            "api_key": "164115xks355fvj3kszf5s",
+            "file_public": 1,
+            "file_adult": 0
+        },
+        "vidara": {
+            "enabled": true,
+            "api_key": "f2750fbeff0a6e1b28cc3ad6146453853f6d3316c0632af1a38f142e9e4a6dac"
+        }
+    }
+}

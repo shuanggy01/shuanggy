@@ -1,0 +1,117 @@
+{
+    "enabled": true,
+    "test_mode": false,
+    "slots": {
+        "home_top": {
+            "label": "Homepage • Atas Trending",
+            "active": true,
+            "target": "all",
+            "code": "<script>\r\n  atOptions = {\r\n    'key' : '71db6cb01ab16c8a4ea9184db697c300',\r\n    'format' : 'iframe',\r\n    'height' : 50,\r\n    'width' : 320,\r\n    'params' : {}\r\n  };\r\n</script>\r\n<script src=\"https://embargotechniquebattle.com/71db6cb01ab16c8a4ea9184db697c300/invoke.js\"></script>"
+        },
+        "home_mid": {
+            "label": "Homepage • Sebelum Video Terbaru",
+            "desktop": {
+                "active": true,
+                "code": "<script>\r\n(function(mhcbu){\r\nvar d = document,\r\n    s = d.createElement('script'),\r\n    l = d.scripts[d.scripts.length - 1];\r\ns.settings = mhcbu || {};\r\ns.src = \"\\/\\/loud-hall.com\\/bYX\\/Vas.dAGWlC0\\/YPWycI\\/Le\\/mV9NuXZFU\\/lrktPWTgcKzXNPjSYxwBNmjZUht\\/NdzwMY2\\/NMjuAM2YODQS\";\r\ns.async = true;\r\ns.referrerPolicy = 'no-referrer-when-downgrade';\r\nl.parentNode.insertBefore(s, l);\r\n})({})\r\n</script>\r\n\r\n<meta name='admaven-placement' content=BpdaErdU5>"
+            },
+            "mobile": {
+                "active": true,
+                "code": "<script>\r\n(function(mhcbu){\r\nvar d = document,\r\n    s = d.createElement('script'),\r\n    l = d.scripts[d.scripts.length - 1];\r\ns.settings = mhcbu || {};\r\ns.src = \"\\/\\/loud-hall.com\\/bYX\\/Vas.dAGWlC0\\/YPWycI\\/Le\\/mV9NuXZFU\\/lrktPWTgcKzXNPjSYxwBNmjZUht\\/NdzwMY2\\/NMjuAM2YODQS\";\r\ns.async = true;\r\ns.referrerPolicy = 'no-referrer-when-downgrade';\r\nl.parentNode.insertBefore(s, l);\r\n})({})\r\n</script>\r\n\r\n<meta name='admaven-placement' content=BpdaErdU5>"
+            }
+        },
+        "player_above": {
+            "label": "Player • Atas Video",
+            "desktop": {
+                "active": true,
+                "code": "<script>\r\n(function(mqz){\r\nvar d = document,\r\n    s = d.createElement('script'),\r\n    l = d.scripts[d.scripts.length - 1];\r\ns.settings = mqz || {};\r\ns.src = \"\\/\\/loud-hall.com\\/b.X\\/VFsBdUGTla0\\/YiWYcV\\/Je\\/mf9WuwZjUKlUkpP\\/TrctzCN\\/jyYgwwMIzecjthNZzcMZ2_NcjBAZ0-M\\/QG\";\r\ns.async = true;\r\ns.referrerPolicy = 'no-referrer-when-downgrade';\r\nl.parentNode.insertBefore(s, l);\r\n})({})\r\n</script>"
+            },
+            "mobile": {
+                "active": true,
+                "code": "<script>\r\n(function(mqz){\r\nvar d = document,\r\n    s = d.createElement('script'),\r\n    l = d.scripts[d.scripts.length - 1];\r\ns.settings = mqz || {};\r\ns.src = \"\\/\\/loud-hall.com\\/b.X\\/VFsBdUGTla0\\/YiWYcV\\/Je\\/mf9WuwZjUKlUkpP\\/TrctzCN\\/jyYgwwMIzecjthNZzcMZ2_NcjBAZ0-M\\/QG\";\r\ns.async = true;\r\ns.referrerPolicy = 'no-referrer-when-downgrade';\r\nl.parentNode.insertBefore(s, l);\r\n})({})\r\n</script>"
+            }
+        },
+        "player_before_play": {
+            "label": "Player • Before Play",
+            "active": true,
+            "target": "all",
+            "code": ""
+        },
+        "player_below": {
+            "label": "Player • Bawah Video",
+            "active": true,
+            "target": "all",
+            "code": "<script>\r\n  atOptions = {\r\n    'key' : '8e43937b0e2129afc68b3569253f2b42',\r\n    'format' : 'iframe',\r\n    'height' : 250,\r\n    'width' : 300,\r\n    'params' : {}\r\n  };\r\n</script>\r\n<script src=\"https://embargotechniquebattle.com/8e43937b0e2129afc68b3569253f2b42/invoke.js\"></script>"
+        },
+        "player_related": {
+            "label": "Player • Sebelum Related Video",
+            "desktop": {
+                "active": true,
+                "code": "<script>\r\n(function(mhcbu){\r\nvar d = document,\r\n    s = d.createElement('script'),\r\n    l = d.scripts[d.scripts.length - 1];\r\ns.settings = mhcbu || {};\r\ns.src = \"\\/\\/loud-hall.com\\/bUXsVFsNd.Gbll0yYJWPcj\\/oewm\\/9QuDZxUblWkJPRT_c_zSNVj\\/Y\\/w\\/MkztcltzNczqMQ2\\/NNjmAe0lM_Qo\";\r\ns.async = true;\r\ns.referrerPolicy = 'no-referrer-when-downgrade';\r\nl.parentNode.insertBefore(s, l);\r\n})({})\r\n</script>"
+            },
+            "mobile": {
+                "active": true,
+                "code": "<script>\r\n(function(mhcbu){\r\nvar d = document,\r\n    s = d.createElement('script'),\r\n    l = d.scripts[d.scripts.length - 1];\r\ns.settings = mhcbu || {};\r\ns.src = \"\\/\\/loud-hall.com\\/bUXsVFsNd.Gbll0yYJWPcj\\/oewm\\/9QuDZxUblWkJPRT_c_zSNVj\\/Y\\/w\\/MkztcltzNczqMQ2\\/NNjmAe0lM_Qo\";\r\ns.async = true;\r\ns.referrerPolicy = 'no-referrer-when-downgrade';\r\nl.parentNode.insertBefore(s, l);\r\n})({})\r\n</script>"
+            }
+        },
+        "album_top": {
+            "label": "Album • Sebelum Daftar Video",
+            "desktop": {
+                "active": true,
+                "code": "<script>\r\n(function(yy){\r\nvar d = document,\r\n    s = d.createElement('script'),\r\n    l = d.scripts[d.scripts.length - 1];\r\ns.settings = yy || {};\r\ns.src = \"\\/\\/loud-hall.com\\/bRXWVqs.dAGWlg0dYfWPcY\\/eepm\\/9\\/udZmUPlQkzPNT\\/cLzpNTj\\/YpwYO\\/TtcntjN_z\\/MF2ENQjOElwiMsQG\";\r\ns.async = true;\r\ns.referrerPolicy = 'no-referrer-when-downgrade';\r\nl.parentNode.insertBefore(s, l);\r\n})({})\r\n</script>"
+            },
+            "mobile": {
+                "active": true,
+                "code": "<script>\r\n(function(yy){\r\nvar d = document,\r\n    s = d.createElement('script'),\r\n    l = d.scripts[d.scripts.length - 1];\r\ns.settings = yy || {};\r\ns.src = \"\\/\\/loud-hall.com\\/bRXWVqs.dAGWlg0dYfWPcY\\/eepm\\/9\\/udZmUPlQkzPNT\\/cLzpNTj\\/YpwYO\\/TtcntjN_z\\/MF2ENQjOElwiMsQG\";\r\ns.async = true;\r\ns.referrerPolicy = 'no-referrer-when-downgrade';\r\nl.parentNode.insertBefore(s, l);\r\n})({})\r\n</script>"
+            }
+        },
+        "header": {
+            "label": "Header • Atas Halaman",
+            "desktop": {
+                "active": false,
+                "code": ""
+            },
+            "mobile": {
+                "active": false,
+                "code": ""
+            }
+        },
+        "footer": {
+            "label": "Footer • Bawah Halaman",
+            "active": true,
+            "target": "all",
+            "code": "<script async=\"async\" data-cfasync=\"false\" src=\"https://embargotechniquebattle.com/ae8ba5b07888e2501cf327e710a2eefc/invoke.js\"></script>\r\n<div id=\"container-ae8ba5b07888e2501cf327e710a2eefc\"></div>"
+        },
+        "player_before_play_2": {
+            "label": "Player • Sebelum Play 2",
+            "active": false,
+            "target": "all",
+            "code": ""
+        }
+    },
+    "antiblock": {
+        "active": true,
+        "code": "",
+        "position": "head",
+        "scopes": {
+            "home": true,
+            "video": true,
+            "category": true,
+            "download": true
+        }
+    },
+    "mobile_scripts": {
+        "active": true,
+        "target": "all",
+        "code": "<script src=\"https://embargotechniquebattle.com/cf/48/11/cf481195aae9d1cd1ef9da95192652bd.js\"></script>",
+        "scopes": {
+            "home": true,
+            "video": true,
+            "category": true,
+            "download": true
+        }
+    },
+    "meta_verification": {
+        "active": true,
+        "code": "<meta name=\"juicyads-site-verification\" content=\"5aed8e7aef9a1a62cafee8fe15e00d27\">"
+    }
+}

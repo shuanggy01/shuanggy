@@ -1,0 +1,184 @@
+/*
+ * Full Player Ads — gaya seperti Clean Tube Player (WPS Player)
+ * Overlay tengah player dengan panel modern, dark theme.
+ */
+
+/* ─── Host ─────────────────────────────────────────────────────────── */
+
+.al-fp-ad-host {
+    position: relative !important;
+}
+
+/* ─── Overlay (latar belakang gelap) ──────────────────────────────── */
+
+.al-fp-ad-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 80;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    transition: opacity 0.3s ease;
+}
+
+.al-fp-ad-overlay[hidden] {
+    display: none !important;
+}
+
+/* ─── Panel Iklan (tengah) ────────────────────────────────────────── */
+
+.al-fp-ad-panel {
+    position: relative;
+    width: 100%;
+    max-width: 720px;
+    margin: 0 16px;
+    background: linear-gradient(180deg, #1a1d23 0%, #0f1115 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+    overflow: hidden;
+}
+
+/* Header panel */
+.al-fp-ad-panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.al-fp-ad-panel__label {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.al-fp-ad-panel__countdown {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.06);
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+
+/* Body panel — tempat kode iklan */
+.al-fp-ad-panel__body {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    background: #0a0b0e;
+}
+
+.al-fp-ad-panel__body iframe,
+.al-fp-ad-panel__body img,
+.al-fp-ad-panel__body ins {
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+/* Footer panel — tombol */
+.al-fp-ad-panel__footer {
+    padding: 12px 16px 16px;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.al-fp-ad-btn-close {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    background: linear-gradient(180deg, #4f46e5 0%, #4338ca 100%);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+}
+
+.al-fp-ad-btn-close:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+}
+
+.al-fp-ad-btn-close:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.al-fp-ad-btn-close:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #374151;
+    box-shadow: none;
+}
+
+.al-fp-ad-btn-close__icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* ─── Below Player Banner ─────────────────────────────────────────── */
+
+.al-fp-below-ad {
+    width: 100%;
+    margin-top: 8px;
+    padding: 12px;
+    background: #050607;
+    border-radius: 8px;
+    text-align: center;
+    overflow: hidden;
+}
+
+.al-fp-below-ad iframe,
+.al-fp-below-ad img,
+.al-fp-below-ad ins {
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+/* ─── Responsive (Mobile) ─────────────────────────────────────────── */
+
+@media (max-width: 576px) {
+    .al-fp-ad-panel {
+        margin: 0 8px;
+        max-width: 100%;
+    }
+
+    .al-fp-ad-panel__body {
+        padding: 12px;
+        min-height: 140px;
+    }
+
+    .al-fp-ad-btn-close {
+        padding: 8px 18px;
+        font-size: 13px;
+    }
+}
+
+/* ─── Prefers Reduced Motion ──────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+    .al-fp-ad-overlay,
+    .al-fp-ad-btn-close {
+        transition: none;
+    }
+}

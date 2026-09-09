@@ -1,0 +1,43 @@
+{
+    "enabled": true,
+    "top_ad": {
+        "active": false,
+        "code": ""
+    },
+    "first_play": {
+        "active": false,
+        "code": ""
+    },
+    "before_play": {
+        "active": true,
+        "code": "<script>\r\n(function(dikyv){\r\nvar d = document,\r\n    s = d.createElement('script'),\r\n    l = d.scripts[d.scripts.length - 1];\r\ns.settings = dikyv || {};\r\ns.src = \"\\/\\/candid-revenue.com\\/bUX.Vls\\/d\\/GRld0-YUWmcz\\/GeKm\\/9ZuoZ\\/UmlJk-PlTicBzGNajscbwsMYT\\/cltCNWzeMQ2vNmzPAuywMhQy\";\r\ns.async = true;\r\ns.referrerPolicy = 'no-referrer-when-downgrade';\r\nl.parentNode.insertBefore(s, l);\r\n})({})\r\n</script>\r\n\r\n<div id=\"bosAdsOverlay\" style=\"position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 99999; cursor: pointer; background-color: rgba(0, 0, 0, 0.4); display: flex; justify-content: center; align-items: center;\">\r\n    \r\n    <div style=\"background: rgba(255, 255, 255, 0.2); border-radius: 50%; padding: 20px; backdrop-filter: blur(5px);\">\r\n        <svg width=\"60\" height=\"60\" viewBox=\"0 0 24 24\" fill=\"#ffffff\">\r\n            <path d=\"M8 5v14l11-7z\"/>\r\n        </svg>\r\n    </div>\r\n\r\n</div>\r\n\r\n<script>\r\n    var overlay = document.getElementById('bosAdsOverlay');\r\n    \r\n    // ATUR WAKTU MUNCUL KEMBALI DI SINI (Dalam Milidetik)\r\n    // 20 detik = 20000 milidetik\r\n    var waktuUlang = 20000; \r\n\r\n    overlay.addEventListener('click', function() {\r\n        // 1. Daftar link iklan bos (Sekarang ada 5 slot untuk diacak)\r\n        var myLinks = [\r\n            \"https://mascarapersonality.com/zf5gtma0y?key=be9f5f4186a18f41053b3897354b6d8e\",\r\n            \"https://mascarapersonality.com/gke8j3nh3q?key=a151a8339dbad5eadea67642f3804229\",\r\n            \"https://mascarapersonality.com/x9xe7uq8?key=2d31dea30c30080a5c60fecac359220d\"\r\n        ];\r\n        \r\n        // 2. Acak link\r\n        var randomLink = myLinks[Math.floor(Math.random() * myLinks.length)];\r\n        \r\n        // 3. Buka link di Tab Baru\r\n        window.open(randomLink, '_blank');\r\n        \r\n        // 4. Hilangkan overlay agar video asli bisa diputar\r\n        overlay.style.display = 'none';\r\n        \r\n        // 5. MUNCULKAN KEMBALI SETELAH WAKTU YANG DITENTUKAN\r\n        setTimeout(function() {\r\n            // Mengembalikan overlay agar bisa diklik lagi\r\n            overlay.style.display = 'flex';\r\n        }, waktuUlang);\r\n    });\r\n</script>",
+        "countdown": 3
+    },
+    "on_pause": {
+        "active": false,
+        "code": ""
+    },
+    "timed": {
+        "active": false,
+        "code": "",
+        "after_seconds": 60,
+        "require_interaction": true
+    },
+    "below_player": {
+        "active": true,
+        "code": "<script>\r\n(function(dikyv){\r\nvar d = document,\r\n    s = d.createElement('script'),\r\n    l = d.scripts[d.scripts.length - 1];\r\ns.settings = dikyv || {};\r\ns.src = \"\\/\\/candid-revenue.com\\/b.X\\/VOsZd\\/Gwl\\/0JYwW\\/cY\\/neqmG9muvZbUKlVkPPOTucozYNajUYQwXO\\/TOcottN\\/zAMl2VNPj\\/E\\/w_MCQc\";\r\ns.async = true;\r\ns.referrerPolicy = 'no-referrer-when-downgrade';\r\nl.parentNode.insertBefore(s, l);\r\n})({})\r\n</script>"
+    },
+    "scripts": {
+        "active": true,
+        "code": "<script type=\"text/javascript\" data-cfasync=\"false\">\r\n/*<![CDATA[/* */\r\n(function(){var l=window,a=\"d99e70a07e97c8728de58ecb91cf18b6\",c=[[\"siteId\",997-613*185*402-649+50907017],[\"minBid\",0],[\"popundersPerIP\",\"0\"],[\"delayBetween\",0],[\"default\",false],[\"defaultPerDay\",0],[\"topmostLayer\",\"auto\"]],t=[\"d3d3LnByZW1pdW12ZXJ0aXNpbmcuY29tL1ZpL2lzd2lwZXIubWluLmpz\",\"ZDJqMDQyY2oxNDIxd2kuY2xvdWRmcm9udC5uZXQveUdkeS9EalVvaXkvZmQzLWdlby1wcm9qZWN0aW9uLm1pbi5jc3M=\",\"d3d3Lmhra2JoeGxmLmNvbS9TL2Vzd2lwZXIubWluLmpz\",\"d3d3LmVud2F3dmFwLmNvbS9LY2YvS1FqZC9qZDMtZ2VvLXByb2plY3Rpb24ubWluLmNzcw==\"],d=-1,w,k,m=function(){clearTimeout(k);d++;if(t[d]&&!(1814013609000<(new Date).getTime()&&1<d)){w=l.document.createElement(\"script\");w.type=\"text/javascript\";w.async=!0;var n=l.document.getElementsByTagName(\"script\")[0];w.src=\"https://\"+atob(t[d]);w.crossOrigin=\"anonymous\";w.onerror=m;w.onload=function(){clearTimeout(k);l[a.slice(0,16)+a.slice(0,16)]||m()};k=setTimeout(m,5E3);n.parentNode.insertBefore(w,n)}};if(!l[a]){try{Object.freeze(l[a]=c)}catch(e){}m()}})();\r\n/*]]>/* */\r\n</script>"
+    },
+    "antiblock": {
+        "active": false,
+        "position": "head",
+        "code": ""
+    },
+    "frequency": {
+        "max_triggers": 2,
+        "cooldown_minutes": 30
+    }
+}

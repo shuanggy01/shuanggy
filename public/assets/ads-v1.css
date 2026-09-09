@@ -1,0 +1,105 @@
+/*
+ * Ad Slots — gaya sederhana seperti RetroTube
+ * Setiap slot punya wrapper dengan class BEM: .ad-slot, .ad-slot__code, .ad-slot__test
+ * Support desktop & mobile via modifier: .ad-slot--desktop / .ad-slot--mobile
+ */
+
+.ad-slot {
+    width: 100%;
+    margin: 22px 0;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.ad-slot__code {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.ad-slot__code iframe,
+.ad-slot__code img,
+.ad-slot__code ins {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Test mode placeholder */
+.ad-slot__test {
+    min-height: 92px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    padding: 18px;
+    border: 1px dashed rgba(255, 193, 7, 0.34);
+    background: linear-gradient(
+        135deg,
+        rgba(255, 193, 7, 0.055),
+        rgba(26, 31, 38, 0.72)
+    );
+    text-align: center;
+}
+
+.ad-slot__kicker {
+    color: #FFC107;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+}
+
+.ad-slot__label {
+    color: #FFFFFF;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.ad-slot__note {
+    color: #7F8790;
+    font-size: 10px;
+}
+
+/* Backward compat — class lama (tanpa BEM) */
+.ad-slot-code {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.ad-slot-test {
+    min-height: 92px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    padding: 18px;
+    border: 1px dashed rgba(255, 193, 7, .34);
+    background: linear-gradient(135deg, rgba(255, 193, 7, .055), rgba(26, 31, 38, .72));
+    text-align: center;
+}
+
+.ad-slot-kicker { color: #FFC107; font-size: 10px; font-weight: 800; letter-spacing: 1.4px; }
+.ad-slot-label  { color: #FFFFFF; font-size: 13px; font-weight: 700; }
+.ad-slot-note   { color: #7F8790; font-size: 10px; }
+
+/* ─── Responsive ─────────────────────────────────────────────────── */
+
+@media (max-width: 620px) {
+    .ad-slot {
+        margin: 17px 0;
+        border-radius: 10px;
+    }
+
+    .ad-slot__test,
+    .ad-slot-test {
+        min-height: 80px;
+        padding: 14px;
+    }
+}

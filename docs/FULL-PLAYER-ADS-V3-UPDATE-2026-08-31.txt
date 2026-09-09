@@ -1,0 +1,44 @@
+ASUPANLENDIR — FULL PLAYER /f/ ADS V3
+Tanggal: 2026-08-31
+
+Fokus pembaruan:
+- Monetisasi /f/ tetap 100% terisolasi dari iklan reguler.
+- Top Floating Ad khusus /f/.
+- First Play Trigger khusus Popunder/click-trigger.
+- Before Play Overlay sekarang muncul setelah tap Play pertama.
+- Countdown Before Play default/preset saat ini: 3 detik.
+- Pause Ad dieksekusi secara lazy saat pause pertama.
+- Timed Secondary Trigger berdasarkan waktu menonton nyata.
+- Opsi Timed: langsung setelah watch time atau tunggu interaksi berikutnya.
+- Bottom Floating Ad menggantikan konsep below-player yang tidak terlihat pada fullscreen player.
+- Social Bar / Global Scripts khusus /f/ tetap tersedia.
+- Anti-AdBlock / Recovery khusus /f/ dengan posisi <head> atau sebelum </body>.
+- Frequency Control bersama untuk First Play + Timed Secondary.
+- Preset awal Frequency: maksimum 2 trigger dalam 30 menit.
+- Dynamic ad injector mengaktifkan kembali elemen <script> pada slot dinamis.
+- JSON payload di halaman /f/ menggunakan JSON_HEX_* agar kode </script> di textarea tidak mematahkan halaman.
+
+Perilaku konfigurasi lama:
+- Existing Full Player global script dipertahankan sebagai Social Bar / Global Scripts.
+- Existing Before Play code dipertahankan, countdown diubah dari 8 menjadi 3 detik.
+- Existing Bottom/Below Player code dipertahankan dan sekarang tampil sebagai floating slot.
+- First Play, Timed, Top Ad, dan Anti-AdBlock baru dibuat kosong agar tidak menduplikasi network script yang sudah aktif.
+
+Isolasi /f/:
+- antiblock_render('full', ...) reguler tetap mengembalikan kosong.
+- ad_mobile_scripts_render('full') reguler tetap mengembalikan kosong.
+- Full Player hanya memakai storage/full-player-ads.json untuk sistem ini.
+
+File utama yang diubah/ditambah:
+- app/ads.php
+- public/full-player.php
+- public/admin/full-player-ads.php
+- public/assets/full-player-ads-v3.js
+- public/assets/full-player-ads-v3.css
+- public/assets/full-player-ads-admin-v3.css
+- storage/full-player-ads.json
+
+Pemeriksaan:
+- 69 file PHP: syntax OK.
+- 5 JSON storage: valid.
+- full-player-ads-v3.js: node --check OK.

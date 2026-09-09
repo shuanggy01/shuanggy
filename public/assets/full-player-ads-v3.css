@@ -1,0 +1,43 @@
+/* Full Player Ads V3 — /f/ isolated aggressive monetization UI */
+.al-fp-ad-host{position:relative!important}
+.al-fp-trigger-mount{position:fixed!important;width:1px!important;height:1px!important;left:-9999px!important;top:-9999px!important;overflow:hidden!important;pointer-events:none!important}
+
+.al-fp-floating-ad{position:absolute;left:50%;z-index:55;transform:translateX(-50%);width:min(92vw,728px);max-height:180px;padding:5px;background:rgba(5,6,7,.94);border:1px solid rgba(255,255,255,.11);border-radius:10px;box-shadow:0 12px 34px rgba(0,0,0,.45);text-align:center}
+.al-fp-floating-ad--top{top:calc(58px + env(safe-area-inset-top))}
+.al-fp-floating-ad--bottom{bottom:calc(52px + env(safe-area-inset-bottom))}
+.al-fp-floating-ad__body{max-width:100%;max-height:165px;overflow:hidden}
+.al-fp-floating-ad__body iframe,.al-fp-floating-ad__body img,.al-fp-floating-ad__body ins{max-width:100%!important}
+.al-fp-floating-ad__close{position:absolute;right:-7px;top:-9px;z-index:2;width:24px;height:24px;padding:0;color:#fff;background:#15181e;border:1px solid rgba(255,255,255,.22);border-radius:50%;font:700 17px/20px Arial,sans-serif;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,.4)}
+
+.al-fp-ad-overlay{position:absolute;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom));background:rgba(0,0,0,.88);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+.al-fp-ad-overlay[hidden]{display:none!important}
+.al-fp-ad-panel{position:relative;width:fit-content;max-width:min(100%,720px);max-height:92dvh;display:flex;flex-direction:column;background:linear-gradient(180deg,#1a1d23,#0f1115);border:1px solid rgba(255,255,255,.09);border-radius:13px;box-shadow:0 20px 60px rgba(0,0,0,.62);overflow:hidden}
+.al-fp-ad-panel__header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.025)}
+.al-fp-ad-panel__label{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.52)}
+.al-fp-ad-panel__countdown{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.75);background:rgba(255,255,255,.07);padding:4px 9px;border-radius:999px}
+.al-fp-ad-panel__countdown:empty{display:none}
+.al-fp-ad-panel__body{position:relative;max-height:65dvh;padding:14px;display:flex;align-items:center;justify-content:center;overflow:auto;background:#08090b;text-align:center}
+.al-fp-ad-panel__body iframe,.al-fp-ad-panel__body img,.al-fp-ad-panel__body ins{max-width:100%!important}
+.al-fp-ad-panel__footer{padding:11px 14px 14px;text-align:center;border-top:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.025)}
+.al-fp-ad-btn-close{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;color:#17120A;background:linear-gradient(135deg,#F5C75B,#EAB84D);border:0;border-radius:9px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(234,184,77,.22)}
+.al-fp-ad-btn-close:disabled{opacity:.48;cursor:not-allowed;box-shadow:none}
+.al-fp-ad-btn-close__icon{width:15px;height:15px}
+
+@media(max-width:576px){
+  .al-fp-floating-ad{width:min(90vw,360px);max-height:130px}
+  .al-fp-floating-ad--top{top:calc(55px + env(safe-area-inset-top))}
+  .al-fp-floating-ad--bottom{bottom:calc(58px + env(safe-area-inset-bottom))}
+  .al-fp-floating-ad__body{max-height:118px}
+  .al-fp-ad-panel{max-width:100%;max-height:94dvh}
+  .al-fp-ad-panel__body{max-height:64dvh;padding:10px}
+  .al-fp-ad-btn-close{padding:9px 18px;font-size:12px}
+}
+
+@media(orientation:landscape) and (max-height:500px){
+  .al-fp-floating-ad--top{top:6px;max-width:55vw}
+  .al-fp-floating-ad--bottom{bottom:6px;max-width:55vw}
+  .al-fp-ad-panel__body{max-height:52dvh}
+  .al-fp-ad-panel__header,.al-fp-ad-panel__footer{padding-top:7px;padding-bottom:7px}
+}
+
+@media(prefers-reduced-motion:reduce){.al-fp-floating-ad,.al-fp-ad-overlay,.al-fp-ad-btn-close{transition:none}}

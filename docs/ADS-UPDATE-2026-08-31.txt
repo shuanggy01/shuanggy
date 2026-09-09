@@ -1,0 +1,23 @@
+ASUPANLENDIR ADS UPDATE - 2026-08-31
+
+Perubahan utama:
+1. Ad Code reguler menerima custom HTML/JavaScript/CSS/iframe/meta tanpa blokir string PHP.
+   Catatan: tag PHP hanya tersimpan/tercetak sebagai teks, tidak dieksekusi server.
+2. Editor slot regular menyimpan Desktop dan Mobile secara terpisah tanpa menimpa struktur lain.
+3. Setiap slot editor diberi rekomendasi format iklan yang cocok.
+4. HilltopAds Anti-AdBlock digeneralisasi menjadi Anti-AdBlock / Global Script universal.
+5. URL baru admin: /admin/anti-adblock.php
+   URL lama /admin/hilltop-antiblock.php tetap redirect untuk kompatibilitas.
+6. Anti-AdBlock / Global Script regular TIDAK memiliki scope /f/ dan runtime memblokir scope full.
+7. Mobile Scripts regular juga selalu mengecualikan /f/.
+8. Full Player /f/ sepenuhnya memakai storage/full-player-ads.json dan tidak bergantung pada master regular ads.
+9. Full Player /f/ tidak memanggil regular ad slots, mobile scripts, atau Anti-AdBlock/global regular script.
+10. Halaman /admin/ads.php diarahkan ke Ads Manager responsif agar tidak ada dua editor dengan format JSON berbeda.
+
+Storage:
+- storage/ads.json = regular slots + mobile_scripts + antiblock
+- storage/full-player-ads.json = seluruh monetisasi khusus /f/
+
+Kompatibilitas:
+- Alias fungsi Hilltop lama tetap ada di app/ads.php agar integrasi lama tidak fatal.
+- storage/hilltop-antiblock.json lama tidak dipakai runtime baru dan dibiarkan sebagai data legacy.

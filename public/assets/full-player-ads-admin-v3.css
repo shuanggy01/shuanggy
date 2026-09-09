@@ -1,0 +1,26 @@
+/* Full Player Ads Admin V3 */
+.fpa-back svg{transform:rotate(180deg)}
+.fpa-hero{margin-bottom:12px}
+.fpa-hero h1{margin:5px 0 0;font-size:25px;line-height:1.1}
+.fpa-hero p{margin:7px 0 0;color:var(--am-muted);font-size:8px;line-height:1.5}
+.fpa-card{margin-bottom:10px;padding:12px;background:var(--am-surface);border:1px solid var(--am-border);border-radius:14px}
+.fpa-master{padding:5px 12px}
+.fpa-accent-card{border-color:rgba(234,184,77,.24);background:linear-gradient(180deg,rgba(234,184,77,.055),var(--am-surface))}
+.fpa-trigger-card{border-color:rgba(248,113,113,.19);background:linear-gradient(180deg,rgba(248,113,113,.035),var(--am-surface))}
+.fpa-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.fpa-card-head strong{display:block;font-size:10px}
+.fpa-card-head span{display:block;margin-top:4px;color:var(--am-muted);font-size:7px;line-height:1.4}
+.fpa-switch input{width:20px;height:20px}
+.fpa-card textarea{width:100%;padding:10px;color:var(--am-text);background:#0D1014;border:1px solid var(--am-border);border-radius:10px;outline:0;resize:vertical;font:inherit;font-size:8px;line-height:1.45}
+.fpa-help{margin-top:7px;color:var(--am-muted);font-size:7px;line-height:1.5}
+.fpa-help strong{color:var(--am-text)}
+.fpa-inline-field{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+.fpa-inline-field label,.fpa-field span{color:var(--am-muted);font-size:8px}
+.fpa-inline-field select,.fpa-field select{min-width:110px;padding:8px;color:var(--am-text);background:#0D1014;border:1px solid var(--am-border);border-radius:9px;font-size:8px}
+.fpa-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:9px}
+.fpa-field{display:grid;gap:6px}
+.fpa-field select{width:100%;min-width:0}
+.fpa-check{display:flex;align-items:center;gap:7px;min-height:36px;padding:7px 9px;color:var(--am-muted);background:#0D1014;border:1px solid var(--am-border);border-radius:9px;font-size:7px;line-height:1.25}
+.fpa-check input{width:17px;height:17px;flex:0 0 auto}
+.fpa-save{width:100%;min-height:45px;margin-bottom:10px;color:#17120A;background:var(--am-gold);border:0;border-radius:11px;font-size:9px;font-weight:900}
+@media(max-width:390px){.fpa-grid-2{grid-template-columns:1fr}.fpa-card{padding:11px}}

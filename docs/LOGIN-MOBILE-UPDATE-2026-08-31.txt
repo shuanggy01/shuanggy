@@ -1,0 +1,20 @@
+ASUPANLENDIR - MOBILE LOGIN + REMEMBER ME
+Tanggal: 2026-08-31
+
+Perubahan utama:
+1. /admin/login.php didesain ulang mobile-first mengikuti palet Admin Mobile.
+2. Login sukses langsung menuju /admin/mobile.php.
+3. /admin/ sekarang menjadi pintu masuk ke dashboard mobile.
+4. Dashboard desktop lama tetap tersedia di /admin/desktop.php.
+5. Remember Me 30 hari memakai selector + validator acak; validator hanya disimpan sebagai SHA-256 hash di database.
+6. Cookie Remember Me: Secure, HttpOnly, SameSite=Lax, path /admin.
+7. Token dirotasi setiap auto-login dan dicabut saat logout.
+8. Tidak ada password mentah yang disimpan oleh fitur Remember Me.
+9. Browser password manager tetap didukung melalui autocomplete=username/current-password.
+10. Tombol tampilkan/sembunyikan password ditambahkan.
+11. Logout pada dashboard mobile diperbaiki menjadi POST + CSRF.
+12. Tabel admin_remember_tokens dibuat otomatis saat dibutuhkan. Migration 009 tetap disertakan untuk dokumentasi/deploy manual.
+
+Catatan:
+- Remember Me hanya disarankan pada HP/perangkat pribadi.
+- Jika user database tidak punya izin CREATE TABLE dan tabel belum pernah dibuat, login biasa tetap bekerja, tetapi Remember Me tidak akan aktif sampai migration 009 dijalankan.

@@ -1,0 +1,55 @@
+RewriteEngine On
+# Secure Video Proxy V1
+RewriteRule ^vp/([A-Za-z0-9_-]{4,64})/?$ video-proxy.php?id=$1 [L,QSA]
+# Legal Pages V1
+RewriteRule ^privacy-policy/?$ legal.php?page=privacy [L,QSA]
+RewriteRule ^terms/?$ legal.php?page=terms [L,QSA]
+RewriteRule ^copyright/?$ legal.php?page=copyright [L,QSA]
+RewriteRule ^disclaimer/?$ legal.php?page=disclaimer [L,QSA]
+RewriteRule ^contact/?$ legal.php?page=contact [L,QSA]
+
+# ==================================================
+# 301 LEGACY URL -> PRETTY URL
+# Hanya jalan kalau URL lama benar-benar diketik/request browser.
+# Tidak mengganggu internal rewrite /v/ dan /c/.
+# ==================================================
+
+RewriteCond %{THE_REQUEST} "\s/+watch\.php\?id=([A-Za-z0-9_-]{4,20})[&\s]" [NC]
+RewriteRule ^watch\.php$ /v/%1 [R=301,L,QSD]
+
+RewriteCond %{THE_REQUEST} "\s/+collection\.php\?id=([A-Za-z0-9_-]{4,20})[&\s]" [NC]
+RewriteRule ^collection\.php$ /c/%1 [R=301,L,QSD]
+
+
+# ==================================================
+# SITEMAP
+# ==================================================
+
+RewriteRule ^sitemap\.xml$ sitemap.php [L,QSA]
+
+
+# ==================================================
+# PRETTY URL INTERNAL REWRITE
+# ==================================================
+
+
+# Full Player / Share Mode V1
+
+# Download Gate V1
+RewriteRule ^dl/([A-Za-z0-9_-]+)$ download.php?id=$1 [L,QSA]
+RewriteRule ^f/([A-Za-z0-9_-]+)$ full-player.php?id=$1 [L,QSA]
+RewriteRule ^v/([A-Za-z0-9_-]{4,20})/?$ watch.php?id=$1 [L,QSA]
+
+# Category System V1
+RewriteRule ^kategori/([a-z0-9-]+)/?$ category.php?slug=$1 [L,QSA]
+RewriteRule ^c/([A-Za-z0-9_-]{4,20})/?$ category-legacy.php?id=$1 [L,QSA]
+# ==================================================
+# BASIC SECURITY HEADERS
+# ==================================================
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+</IfModule>

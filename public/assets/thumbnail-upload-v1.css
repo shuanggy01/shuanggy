@@ -1,0 +1,116 @@
+/* Thumbnail Upload V1 */
+
+.vm-thumb-editor{
+    margin-bottom:14px;
+    padding:12px;
+    background:#0E1115;
+    border:1px solid var(--am-border);
+    border-radius:13px;
+}
+
+.vm-thumb-editor-title{
+    margin-bottom:9px;
+    color:var(--am-muted);
+    font-size:9px;
+    font-weight:700;
+}
+
+.vm-thumb-preview-wrap{
+    position:relative;
+    overflow:hidden;
+    width:100%;
+    aspect-ratio:16/9;
+    margin-bottom:11px;
+    background:#07080A;
+    border:1px solid var(--am-border);
+    border-radius:12px;
+}
+
+.vm-thumb-preview-wrap img{
+    width:100%;
+    height:100%;
+    display:block;
+    object-fit:cover;
+}
+
+.vm-thumb-preview-empty{
+    position:absolute;
+    inset:0;
+    display:grid;
+    place-items:center;
+    color:var(--am-muted-2);
+    font-size:9px;
+}
+
+.vm-thumb-file{
+    position:relative;
+    min-height:44px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    overflow:hidden;
+    color:#16120A;
+    background:var(--am-gold);
+    border-radius:11px;
+    font-size:9px;
+    font-weight:850;
+}
+
+.vm-thumb-file input{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    opacity:0;
+    cursor:pointer;
+}
+
+.vm-thumb-file-note{
+    margin-top:7px;
+    color:var(--am-muted);
+    font-size:7px;
+    line-height:1.45;
+}
+
+.vm-thumb-or{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    margin:12px 0;
+    color:var(--am-muted-2);
+    font-size:7px;
+    text-transform:uppercase;
+    letter-spacing:.8px;
+}
+
+.vm-thumb-or::before,
+.vm-thumb-or::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--am-border-soft);
+}
+
+.vm-thumb-remove{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:10px;
+    color:var(--am-muted);
+    font-size:8px;
+}
+
+.vm-thumb-remove input{
+    width:18px !important;
+    height:18px !important;
+    min-height:0 !important;
+    padding:0 !important;
+}
+
+.vm-thumb-file-name{
+    margin-top:7px;
+    color:var(--am-gold);
+    font-size:7px;
+    overflow-wrap:anywhere;
+}

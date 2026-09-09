@@ -1,0 +1,29 @@
+{
+    "general": {
+        "site_name": "AsupanLendir",
+        "base_url": "https://asupanlendir.sbs",
+        "footer_text": "AsupanLendir",
+        "telegram_url": ""
+    },
+    "seo": {
+        "home_title": "AsupanLendir",
+        "home_description": "Video terbaru, koleksi, dan konten trending di AsupanLendir.",
+        "default_og_image": "https://asupanlendir.sbs/assets/og-asupanlendir.jpg",
+        "home_noindex": false
+    },
+    "appearance": {
+        "primary": "#FFC107",
+        "background": "#0F1115",
+        "card": "#1A1F26",
+        "text": "#FFFFFF",
+        "text_secondary": "#A7ADB3",
+        "logo_url": "/assets/brand-mark.png",
+        "favicon_url": "/favicon",
+        "theme_color": "#0F1115"
+    },
+    "integration": {
+        "cdn_url": "https://cdn.videy.ca",
+        "api_provider_url": "",
+        "api_key": ""
+    }
+}

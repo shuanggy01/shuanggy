@@ -1,0 +1,134 @@
+/* AsupanLendir Homepage + Footer Polish V2 */
+
+body{
+    overflow-x:hidden;
+}
+
+.site-legal-footer{
+    margin-top:18px !important;
+    background:#0A0C0F !important;
+    border-top:1px solid #252B33 !important;
+}
+
+.site-legal-footer-inner{
+    width:min(1180px,100%);
+    margin:0 auto;
+    padding:16px 18px calc(16px + env(safe-area-inset-bottom)) !important;
+}
+
+.site-legal-brand{
+    justify-content:center;
+    gap:10px !important;
+    text-align:left;
+}
+
+.site-legal-brand img{
+    width:34px !important;
+    height:34px !important;
+    flex:0 0 34px;
+    border-radius:50%;
+    box-shadow:
+        0 0 0 1px rgba(234,184,77,.18),
+        0 0 18px rgba(234,184,77,.08);
+}
+
+.site-legal-brand strong{
+    font-size:12px !important;
+    line-height:1.2;
+}
+
+.site-legal-brand span{
+    margin-top:2px !important;
+    color:#858F9D;
+    font-size:8px !important;
+    line-height:1.35;
+}
+
+.site-legal-links{
+    justify-content:center;
+    gap:6px 7px !important;
+    margin-top:12px !important;
+}
+
+.site-legal-links a{
+    min-height:28px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 9px;
+    color:#C9CFD7 !important;
+    background:#11151A;
+    border:1px solid #252B33;
+    border-radius:999px;
+    font-size:8px !important;
+    line-height:1;
+}
+
+.site-legal-links a:hover{
+    color:#F5C75B !important;
+    background:rgba(234,184,77,.055);
+    border-color:rgba(234,184,77,.22);
+}
+
+.site-legal-note{
+    margin-top:11px !important;
+    text-align:center;
+    color:#7F8997;
+    font-size:8px !important;
+}
+
+.site-legal-note a{
+    color:#EAB84D !important;
+    font-weight:800;
+}
+
+.al-legacy-footer-hidden{
+    display:none !important;
+}
+
+body.al-home-polish .site-legal-footer{
+    margin-top:14px !important;
+}
+
+body.al-home-polish main{
+    padding-bottom:14px !important;
+}
+
+@media(max-width:699px){
+    .site-legal-footer-inner{
+        padding:15px 16px calc(15px + env(safe-area-inset-bottom)) !important;
+    }
+
+    .site-legal-brand{
+        max-width:310px;
+        margin:0 auto;
+    }
+
+    .site-legal-links{
+        max-width:330px;
+        margin-left:auto !important;
+        margin-right:auto !important;
+    }
+}
+
+@media(min-width:700px){
+    .site-legal-footer-inner{
+        display:grid !important;
+        grid-template-columns:auto minmax(0,1fr) auto;
+        align-items:center;
+        gap:18px;
+    }
+
+    .site-legal-brand{
+        justify-content:flex-start;
+    }
+
+    .site-legal-links{
+        margin-top:0 !important;
+    }
+
+    .site-legal-note{
+        margin-top:0 !important;
+        text-align:right;
+    }
+}

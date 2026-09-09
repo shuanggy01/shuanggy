@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin/
+Disallow: /telegram/
+
+Sitemap: https://asupanlendir.sbs/sitemap.xml

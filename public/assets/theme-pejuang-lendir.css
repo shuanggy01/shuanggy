@@ -1,0 +1,297 @@
+/*
+|--------------------------------------------------------------------------
+| ASUPANLENDIR - PEJUANG LENDIR COLOR THEME V1
+|--------------------------------------------------------------------------
+| Visual override only. No layout / PHP / feature logic changes.
+*/
+
+:root {
+    --pl-primary: #FFC107;
+    --pl-primary-dark: #F2B705;
+    --pl-dark: #0F1115;
+    --pl-card: #1A1F26;
+    --pl-card-2: #15191F;
+    --pl-border: #2A3038;
+    --pl-border-gold: rgba(255, 193, 7, .28);
+    --pl-text: #FFFFFF;
+    --pl-text-secondary: #A7ADB3;
+    --pl-danger: #FF5252;
+    --pl-info: #4DA3FF;
+    --pl-shadow-gold: rgba(255, 193, 7, .12);
+}
+
+html {
+    color-scheme: dark;
+}
+
+body {
+    background:
+        radial-gradient(circle at 50% -18%, rgba(255,193,7,.07), transparent 34%),
+        var(--pl-dark) !important;
+    color: var(--pl-text) !important;
+}
+
+/* HEADER / NAV */
+.site-header,
+header {
+    background: rgba(15, 17, 21, .96) !important;
+    border-bottom-color: var(--pl-border) !important;
+}
+
+.logo {
+    color: var(--pl-text) !important;
+    text-shadow: 0 0 18px rgba(255,193,7,.08);
+}
+
+.quick-nav-wrap {
+    border-top-color: rgba(255,193,7,.08) !important;
+}
+
+.nav-pill,
+.home-link,
+.clear-search {
+    background: var(--pl-card) !important;
+    border-color: var(--pl-border) !important;
+    color: var(--pl-text-secondary) !important;
+}
+
+.nav-pill:hover,
+.home-link:hover,
+.clear-search:hover {
+    color: var(--pl-primary) !important;
+    border-color: var(--pl-border-gold) !important;
+    background: #20252D !important;
+}
+
+/* SEARCH */
+.search input {
+    background: var(--pl-card) !important;
+    border-color: var(--pl-border) !important;
+    color: var(--pl-text) !important;
+}
+
+.search input::placeholder {
+    color: #737B85 !important;
+}
+
+.search input:focus {
+    border-color: var(--pl-primary) !important;
+    box-shadow: 0 0 0 3px rgba(255,193,7,.08);
+}
+
+.search button {
+    background: var(--pl-primary) !important;
+    color: #111318 !important;
+}
+
+.search button:hover {
+    background: var(--pl-primary-dark) !important;
+}
+
+/* TEXT */
+.hero p,
+.hero-side,
+.section-note,
+.card-meta,
+.video-meta,
+.related-meta,
+.meta,
+.album-meta,
+.album-desc,
+.breadcrumb,
+.header-stats,
+.page-info,
+.nav-label,
+.stat-label,
+.stat-sub,
+.small,
+.recent-time,
+footer {
+    color: var(--pl-text-secondary) !important;
+}
+
+.ad-slot__code{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;overflow:hidden}
+.ad-slot__code>*{display:block;max-width:100%;margin-inline:auto}
+.ad-slot__code img,.ad-slot__code iframe{max-width:100%!important}
+.ad-slot__code img{height:auto!important}
+
+.section-title,
+.section-head h2,
+.card-title,
+.video-title,
+.related-title,
+.nav-title,
+.album-info h1,
+.content-head h1,
+h1,
+h2 {
+    color: var(--pl-text) !important;
+}
+
+/* CARDS / PANELS */
+.stat,
+.card,
+.description,
+.nav-card,
+.album-hero,
+.empty {
+    background: var(--pl-card) !important;
+    border-color: var(--pl-border) !important;
+}
+
+.album-hero,
+.description,
+.nav-card {
+    box-shadow: 0 8px 28px rgba(0,0,0,.14);
+}
+
+.media-image,
+.thumb,
+.album-cover,
+.player-shell {
+    background: var(--pl-card-2) !important;
+    border-color: var(--pl-border) !important;
+}
+
+.media-image,
+.thumb,
+.album-cover {
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.015);
+}
+
+.media-card:hover .media-image,
+.card:hover .thumb {
+    box-shadow:
+        inset 0 0 0 1px rgba(255,193,7,.18),
+        0 8px 25px var(--pl-shadow-gold);
+}
+
+/* BADGES */
+.badge,
+.trending-rank,
+.order-badge,
+.trend-badge,
+.cover-badge {
+    background: var(--pl-primary) !important;
+    color: #111318 !important;
+    box-shadow: 0 4px 16px rgba(255,193,7,.18);
+}
+
+.play,
+.play-badge {
+    background: rgba(255,193,7,.92) !important;
+    color: #111318 !important;
+}
+
+/* BUTTONS */
+.btn {
+    background: var(--pl-card) !important;
+    border-color: var(--pl-border) !important;
+    color: var(--pl-text) !important;
+}
+
+.btn:hover {
+    background: #222831 !important;
+    border-color: var(--pl-border-gold) !important;
+    color: var(--pl-primary) !important;
+}
+
+.btn.primary,
+.page-btn.primary {
+    background: var(--pl-primary) !important;
+    border-color: var(--pl-primary) !important;
+    color: #111318 !important;
+}
+
+.btn.primary:hover,
+.page-btn.primary:hover {
+    background: var(--pl-primary-dark) !important;
+    border-color: var(--pl-primary-dark) !important;
+    color: #111318 !important;
+}
+
+.page-btn {
+    background: var(--pl-card) !important;
+    border-color: var(--pl-border) !important;
+    color: var(--pl-text-secondary) !important;
+}
+
+.page-btn:hover {
+    border-color: var(--pl-border-gold) !important;
+    color: var(--pl-primary) !important;
+}
+
+/* PLAYER */
+.player-shell {
+    border-color: rgba(255,193,7,.20) !important;
+    box-shadow:
+        0 12px 35px rgba(0,0,0,.32),
+        0 0 0 1px rgba(255,193,7,.04) !important;
+}
+
+/* LINKS */
+.breadcrumb a,
+.meta a,
+.section-head a {
+    color: var(--pl-text-secondary) !important;
+}
+
+.breadcrumb a:hover,
+.meta a:hover,
+.section-head a:hover {
+    color: var(--pl-primary) !important;
+}
+
+/* TOAST */
+.toast {
+    background: var(--pl-primary) !important;
+    color: #111318 !important;
+    box-shadow: 0 8px 30px rgba(255,193,7,.22);
+}
+
+/* FOOTER */
+footer {
+    border-top-color: var(--pl-border) !important;
+}
+
+/* OPTIONAL ANALYTICS / ADMIN-LIKE COMPONENTS ALREADY SHARING CLASSES */
+.card-head span,
+.legend,
+.rank {
+    color: var(--pl-text-secondary) !important;
+}
+
+.track {
+    background: #20252D !important;
+}
+
+.video-bar {
+    background: var(--pl-primary) !important;
+}
+
+.album-bar {
+    background: #8B949E !important;
+}
+
+th {
+    color: var(--pl-text-secondary) !important;
+}
+
+th,
+td,
+.recent-item {
+    border-bottom-color: var(--pl-border) !important;
+}
+
+/* SMALL GOLD ACCENTS */
+::selection {
+    background: rgba(255,193,7,.30);
+    color: #fff;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+    outline: 2px solid var(--pl-primary);
+    outline-offset: 2px;
+}

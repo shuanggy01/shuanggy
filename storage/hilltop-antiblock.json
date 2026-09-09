@@ -1,0 +1,12 @@
+{
+    "active": true,
+    "code": "<script src=\"https://embargotechniquebattle.com/cf/48/11/cf481195aae9d1cd1ef9da95192652bd.js\"></script>",
+    "position": "head",
+    "scopes": {
+        "home": true,
+        "video": true,
+        "category": true,
+        "download": true,
+        "full": false
+    }
+}

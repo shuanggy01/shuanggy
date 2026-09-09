@@ -1,0 +1,113 @@
+/* AsupanLendir Multi Server V1 */
+
+.player-shell .mirror-frame-wrap {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    background: #000;
+}
+
+.player-shell .mirror-frame-wrap[hidden] {
+    display: none !important;
+}
+
+.player-shell .mirror-frame-wrap iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #000;
+}
+
+.player-shell.mirror-active::after {
+    opacity: 0 !important;
+}
+
+.player-shell.mirror-active > video,
+.player-shell.mirror-active > .big-play,
+.player-shell.mirror-active > .controls {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+.server-switcher {
+    width: min(960px, 100%);
+    margin: 10px auto 2px;
+    padding: 10px;
+    border: 1px solid var(--line, #2A3038);
+    background: var(--panel, #1A1F26);
+    border-radius: 12px;
+}
+
+.server-switcher-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.server-switcher-title {
+    color: var(--muted, #A7ADB3);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+
+.server-switcher-note {
+    color: var(--muted, #A7ADB3);
+    font-size: 9px;
+}
+
+.server-tabs {
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.server-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.server-tab {
+    flex: 0 0 auto;
+    border: 1px solid var(--line, #2A3038);
+    background: var(--bg, #0F1115);
+    color: var(--muted, #A7ADB3);
+    border-radius: 9px;
+    padding: 9px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.server-tab:hover {
+    color: var(--primary, #FFC107);
+    border-color: rgba(255,193,7,.30);
+}
+
+.server-tab.active {
+    background: var(--primary, #FFC107);
+    color: #111318;
+    border-color: var(--primary, #FFC107);
+}
+
+@media (max-width: 620px) {
+    .server-switcher {
+        margin-top: 8px;
+        padding: 8px;
+        border-radius: 10px;
+    }
+
+    .server-switcher-note {
+        display: none;
+    }
+
+    .server-tab {
+        padding: 9px 11px;
+        font-size: 10px;
+    }
+}

@@ -1,0 +1,52 @@
+/*
+|--------------------------------------------------------------------------
+| ASUPANLENDIR BRANDING V2
+|--------------------------------------------------------------------------
+| Header logo / favicon branding only.
+| No layout logic, PHP logic, routing, counters or features changed.
+*/
+
+.logo {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 9px !important;
+}
+
+.logo .brand-mark {
+    width: 35px;
+    height: 35px;
+    display: block;
+    flex: 0 0 35px;
+    object-fit: cover;
+    border-radius: 50%;
+    box-shadow:
+        0 0 0 1px rgba(255,193,7,.34),
+        0 0 17px rgba(255,193,7,.16);
+}
+
+.logo .brand-name {
+    display: inline-block;
+    color: #fff;
+}
+
+.logo:hover .brand-mark {
+    box-shadow:
+        0 0 0 1px rgba(255,193,7,.58),
+        0 0 22px rgba(255,193,7,.24);
+}
+
+.logo:hover .brand-name {
+    color: #FFC107;
+}
+
+@media (max-width: 620px) {
+    .logo {
+        gap: 7px !important;
+    }
+
+    .logo .brand-mark {
+        width: 31px;
+        height: 31px;
+        flex-basis: 31px;
+    }
+}
