@@ -101,6 +101,23 @@ $mobile = is_array($current['mobile_scripts'] ?? null)
 $active = !empty($mobile['active']);
 $code = (string) ($mobile['code'] ?? '');
 $target = (string) ($mobile['target'] ?? 'mobile');
+
+$scopeLabels = [
+    'home' => 'Beranda',
+    'video' => 'Halaman Video',
+    'category' => 'Kategori / Koleksi',
+    'download' => 'Halaman Download',
+];
+
+$savedScopes = is_array($mobile['scopes'] ?? null) ? $mobile['scopes'] : [];
+$scopes = [];
+foreach ($scopeLabels as $key => $_label) {
+    // Konfigurasi lama tanpa kunci scopes dianggap aktif di semua halaman,
+    // supaya perilaku situs tidak berubah diam-diam saat halaman ini dibuka.
+    $scopes[$key] = !array_key_exists($key, $savedScopes)
+        || !empty($savedScopes[$key]);
+}
+
 $error = '';
 
 if (
@@ -123,6 +140,17 @@ if (
             );
         }
 
+        $posted = is_array($_POST['scopes'] ?? null) ? $_POST['scopes'] : [];
+        foreach ($scopeLabels as $key => $_label) {
+            $scopes[$key] = !empty($posted[$key]);
+        }
+
+        if (!in_array(true, $scopes, true)) {
+            throw new RuntimeException(
+                'Pilih minimal satu halaman, atau matikan Global Scripts.'
+            );
+        }
+
         $runtime = ms_read_runtime();
 
         if (!$runtime) {
@@ -142,12 +170,7 @@ if (
             'active' => $active,
             'target' => $target,
             'code' => $code,
-            'scopes' => [
-                'home' => true,
-                'video' => true,
-                'category' => true,
-                'download' => true,
-            ],
+            'scopes' => $scopes,
         ];
 
         ms_write($runtime);
@@ -262,6 +285,14 @@ if (
 <option value="all" <?= $target === 'all' ? 'selected' : '' ?>>HP + Desktop</option>
 <option value="desktop" <?= $target === 'desktop' ? 'selected' : '' ?>>Desktop saja</option>
 </select></div>
+
+<div class="ads2-field"><label>Tayangkan di halaman</label>
+<?php foreach ($scopeLabels as $scopeKey => $scopeLabel): ?>
+<label class="ads2-toggle-row"><span><?= am_e($scopeLabel) ?></span>
+<input type="checkbox" name="scopes[<?= am_e($scopeKey) ?>]" value="1" <?= !empty($scopes[$scopeKey]) ? 'checked' : '' ?>></label>
+<?php endforeach; ?>
+<small>Script global ini dimuat di setiap halaman yang dicentang. Matikan
+"Beranda" kalau popunder/social bar hanya untuk halaman video.</small></div>
 
 
 <div class="ads2-field">
