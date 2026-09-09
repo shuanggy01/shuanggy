@@ -112,51 +112,131 @@ function ad_config(): array
     $root = dirname(__DIR__);
     $config = ad_default_config();
 
+    $fileConfig = [];
     $defaultFile = $root . '/config/ads.php';
     if (is_file($defaultFile)) {
         $loaded = require $defaultFile;
         if (is_array($loaded)) {
-            $config = ad_merge_config($config, $loaded);
+            $fileConfig = $loaded;
         }
     }
 
     $runtime = ad_runtime_config();
+
+    // Slot dinormalisasi PER SUMBER sebelum digabung. Tanpa ini, slot yang di
+    // config/ads.php masih berbentuk lama (active/target/code) bisa membayangi
+    // bentuk desktop/mobile di storage/ads.json dan menghapus iklan diam-diam.
+    $slots = ad_normalize_slots(
+        is_array($fileConfig['slots'] ?? null) ? $fileConfig['slots'] : []
+    );
+
+    $runtimeSlots = ad_normalize_slots(
+        is_array($runtime['slots'] ?? null) ? $runtime['slots'] : []
+    );
+
+    foreach ($runtimeSlots as $name => $slot) {
+        $slots[$name] = isset($slots[$name])
+            ? ad_merge_config($slots[$name], $slot)
+            : $slot;
+    }
+
+    unset($fileConfig['slots'], $runtime['slots']);
+
+    $config = ad_merge_config($config, $fileConfig);
     if ($runtime) {
         $config = ad_merge_config($config, $runtime);
     }
 
-    $cache = $config;
-    return $config;
+    $config['slots'] = $slots;
+
+    return $cache = $config;
 }
 
 /**
- * Normalisasi slot lama (active/code langsung) dan slot baru (desktop/mobile).
+ * Bentuk kanonik slot:
+ *
+ *   ['label' => string, 'desktop' => ['active','code'], 'mobile' => ['active','code']]
+ *
+ * Menerima bentuk lama (active/target/code) maupun bentuk desktop/mobile, dan
+ * selalu mengembalikan bentuk kanonik. Idempoten: aman dipanggil berulang.
+ */
+function ad_normalize_slot(array $slot): array
+{
+    $canonical = [
+        'desktop' => ['active' => false, 'code' => ''],
+        'mobile' => ['active' => false, 'code' => ''],
+    ];
+
+    $label = trim((string) ($slot['label'] ?? ''));
+    if ($label !== '') {
+        // Hanya disertakan bila terisi, supaya label kosong di runtime tidak
+        // menimpa label bawaan dari config/ads.php saat digabung.
+        $canonical['label'] = $label;
+    }
+
+    $hasPerDevice = false;
+    foreach (['desktop', 'mobile'] as $device) {
+        if (isset($slot[$device]) && is_array($slot[$device])) {
+            $hasPerDevice = true;
+            $canonical[$device] = [
+                'active' => !empty($slot[$device]['active']),
+                'code' => (string) ($slot[$device]['code'] ?? ''),
+            ];
+        }
+    }
+
+    $hasLegacy = array_key_exists('code', $slot)
+        || array_key_exists('target', $slot);
+
+    if ($hasLegacy) {
+        $legacyCode = (string) ($slot['code'] ?? '');
+
+        // Bila satu slot terlanjur memuat kedua bentuk, bentuk lama hanya
+        // menang kalau benar-benar membawa kode.
+        if (!$hasPerDevice || $legacyCode !== '') {
+            $target = (string) ($slot['target'] ?? 'all');
+            if (!in_array($target, ['mobile', 'desktop', 'all'], true)) {
+                $target = 'all';
+            }
+
+            $legacyActive = !array_key_exists('active', $slot)
+                || !empty($slot['active']);
+
+            foreach (['desktop', 'mobile'] as $device) {
+                $canonical[$device] = [
+                    'active' => $legacyActive
+                        && ($target === 'all' || $target === $device),
+                    'code' => $legacyCode,
+                ];
+            }
+        }
+    }
+
+    return $canonical;
+}
+
+function ad_normalize_slots(array $slots): array
+{
+    $out = [];
+
+    foreach ($slots as $name => $slot) {
+        if (is_array($slot)) {
+            $out[$name] = ad_normalize_slot($slot);
+        }
+    }
+
+    return $out;
+}
+
+/**
+ * Varian satu slot untuk perangkat tertentu, selalu lewat bentuk kanonik.
  */
 function ad_slot_variant(array $slot, string $device): array
 {
-    if (array_key_exists('target', $slot) || array_key_exists('code', $slot)) {
-        $target = (string) ($slot['target'] ?? 'all');
-        if (!in_array($target, ['mobile', 'desktop', 'all'], true)) {
-            $target = 'all';
-        }
+    $canonical = ad_normalize_slot($slot);
+    $device = $device === 'mobile' ? 'mobile' : 'desktop';
 
-        return [
-            'active' => !empty($slot['active']) && ($target === 'all' || $target === $device),
-            'code' => (string) ($slot['code'] ?? ''),
-        ];
-    }
-
-    if (isset($slot[$device]) && is_array($slot[$device])) {
-        return [
-            'active' => !empty($slot[$device]['active']),
-            'code' => (string) ($slot[$device]['code'] ?? ''),
-        ];
-    }
-
-    return [
-        'active' => !array_key_exists('active', $slot) || !empty($slot['active']),
-        'code' => (string) ($slot['code'] ?? ''),
-    ];
+    return $canonical[$device];
 }
 
 function ad_slot_payload(string $slotName): array
@@ -166,12 +246,6 @@ function ad_slot_payload(string $slotName): array
     $slot = is_array($slots[$slotName] ?? null) ? $slots[$slotName] : [];
     $device = ad_is_mobile() ? 'mobile' : 'desktop';
     $variant = ad_slot_variant($slot, $device);
-
-    // Hanya player_on_pause yang dipertahankan nonaktif (slot lama, tidak terpasang di halaman mana pun).
-    // Slot home_mid, player_above, player_related, album_top aktif kembali sesuai konfigurasi runtime.
-    if (in_array($slotName, ['player_on_pause'], true)) {
-        $variant['active'] = false;
-    }
 
     return [
         'system_enabled' => !empty($config['enabled']),
@@ -456,8 +530,8 @@ function fp_ads_public_payload(): array
             'code' => trim((string) ($fp['below_player']['code'] ?? '')),
         ],
         'on_pause' => [
-            'active' => false,
-            'code' => '',
+            'active' => !empty($fp['on_pause']['active']),
+            'code' => trim((string) ($fp['on_pause']['code'] ?? '')),
         ],
         'timed' => [
             'active' => !empty($fp['timed']['active']),

@@ -78,6 +78,18 @@ $slotDefinitions = [
         'description' => 'Banner utama halaman beranda.',
         'preview' => '/',
     ],
+    'home_mid' => [
+        'title' => 'Beranda • Sebelum Video Terbaru',
+        'short' => 'Beranda Tengah',
+        'description' => 'Di antara Trending dan Video Terbaru.',
+        'preview' => '/',
+    ],
+    'player_above' => [
+        'title' => 'Player • Atas Video',
+        'short' => 'Player Above',
+        'description' => 'Tepat di atas pemutar video.',
+        'preview' => '/v/B4Dc0JUWc',
+    ],
     'player_before_play' => [
         'title' => 'Sebelum Play 1',
         'short' => 'Sebelum Play 1',
@@ -95,6 +107,18 @@ $slotDefinitions = [
         'short' => 'Player Below',
         'description' => 'Tepat di bawah pemutar video.',
         'preview' => '/v/B4Dc0JUWc',
+    ],
+    'player_related' => [
+        'title' => 'Player • Sebelum Related',
+        'short' => 'Player Related',
+        'description' => 'Di atas daftar video terkait.',
+        'preview' => '/v/B4Dc0JUWc',
+    ],
+    'album_top' => [
+        'title' => 'Kategori • Sebelum Daftar Video',
+        'short' => 'Kategori',
+        'description' => 'Di atas daftar video halaman kategori/koleksi.',
+        'preview' => '/',
     ],
     'footer' => [
         'title' => 'Iklan Footer',

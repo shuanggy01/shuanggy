@@ -2,8 +2,17 @@
 
 Temuan dari pembacaan `app/ads.php`, `config/ads.php`, `storage/ads.json`,
 `public/admin/ads-mobile.php`, `public/admin/ad-mobile-edit.php`, dan
-`public/assets/player-ads-v1.js`. **Belum ada yang diperbaiki** — cleanup
-commit ini hanya membuang file backup.
+`public/assets/player-ads-v1.js`.
+
+| # | Temuan | Status |
+|---|--------|--------|
+| 1 | Empat slot aktif tidak ada di panel admin | **selesai** |
+| 2 | Editor slot menimpa struktur desktop/mobile | **selesai** |
+| 3 | `ad_slot_variant()` mengabaikan kode nested | **selesai** |
+| 4 | `/f/` Pause Ad dimatikan paksa di kode | **selesai** |
+| 5 | Slot `header` tidak pernah dirender | terbuka |
+| 6 | Label tidak sinkron antara config dan runtime | **selesai** |
+| 7 | Overlay before-play tidak menahan playback | terbuka |
 
 ---
 
@@ -120,3 +129,60 @@ Overlay juga di-append ke `video.parentElement`. Kalau elemen itu
 - `.env` berisi `DB_PASSWORD` asli. Sekarang masuk `.gitignore`; template
   ada di `.env.example`. Kalau file itu pernah ter-push ke remote publik,
   rotasi password DB.
+
+
+---
+
+# Perbaikan yang sudah diterapkan
+
+## Temuan 1 — slot yatim sekarang bisa dikelola
+
+`home_mid`, `player_above`, `player_related`, dan `album_top` ditambahkan ke
+`$slotDefinitions` di `ads-mobile.php` dan `ad-mobile-edit.php`. Sembilan slot
+yang benar-benar dirender kini semuanya muncul di panel.
+
+## Temuan 2 & 3 — satu bentuk slot, kode per-perangkat terpisah
+
+- `ad_normalize_slot()` / `ad_normalize_slots()` baru di `app/ads.php`
+  mengubah bentuk apa pun ke bentuk kanonik `label + desktop/mobile`.
+- `ad_config()` menormalkan **per sumber** sebelum menggabung, jadi bentuk lama
+  di `config/ads.php` tidak bisa lagi membayangi bentuk baru di
+  `storage/ads.json`.
+- `ad_slot_variant()` sekarang hanya membaca bentuk kanonik, dan idempoten.
+- `ad-mobile-edit.php` punya kotak kode HP dan Desktop terpisah, plus opsi
+  "Samakan dengan HP". Penyimpanan selalu dalam bentuk kanonik.
+- `scripts/migrate-ads-slot-format.php` merapikan JSON lama (`--write`).
+
+Regresi diverifikasi: seluruh slot live resolve byte-identik sebelum dan
+sesudah perubahan, dan test slot dua-bentuk yang gagal di kode lama sekarang
+lolos.
+
+## Temuan 4 — Pause Ad `/f/` hidup kembali
+
+`fp_ads_public_payload()` dulu memaksa `on_pause` jadi
+`active => false, code => ''`, padahal form admin, penyimpanan JSON, dan
+overlay di `full-player-ads-v3.js` semuanya sudah lengkap. Sekarang nilainya
+dibaca dari konfigurasi, jadi kartu **Pause Ad** di `/admin/full-player-ads.php`
+benar-benar berfungsi.
+
+Hardcode serupa untuk `player_on_pause` di situs reguler juga dibuang dari
+`ad_slot_payload()`. Slot itu tetap tidak tayang karena memang tidak ada
+`ad_render('player_on_pause')` di halaman mana pun — lihat temuan 5.
+
+## Temuan 6 — label
+
+Label runtime yang kosong tidak lagi menimpa label dari `config/ads.php`;
+`ad_normalize_slot()` hanya menyertakan `label` bila terisi.
+
+---
+
+# Masih terbuka
+
+**Temuan 5** — slot `header` ada di config dan JSON tapi tidak pernah dipanggil
+`ad_render('header')`. Perlu keputusan: pasang di layout, atau buang slotnya.
+Sama untuk `player_on_pause` di situs reguler.
+
+**Temuan 7** — `public/assets/player-ads-v1.js` hanya menyembunyikan overlay saat
+`play`, tidak menahan playback, dan meng-append ke `video.parentElement` yang
+bisa `position: static`. Perlu perbaikan terpisah karena menyentuh perilaku
+player.

@@ -42,6 +42,18 @@ $slotDefinitions = [
         'recommended' => 'Banner responsif, Native Banner, Social Bar ringan, atau display script.',
         'preview' => '/',
     ],
+    'home_mid' => [
+        'title' => 'Beranda • Sebelum Video Terbaru',
+        'description' => 'Di antara Trending dan daftar Video Terbaru.',
+        'recommended' => 'Banner responsif atau Native Banner.',
+        'preview' => '/',
+    ],
+    'player_above' => [
+        'title' => 'Player • Atas Video',
+        'description' => 'Tepat di atas pemutar video.',
+        'recommended' => 'Banner responsif atau Native Banner.',
+        'preview' => '/v/B4Dc0JUWc',
+    ],
     'player_before_play' => [
         'title' => 'Sebelum Play 1',
         'description' => 'Overlay di dalam player sebelum video pertama kali diputar.',
@@ -60,6 +72,18 @@ $slotDefinitions = [
         'recommended' => 'Banner, Native Ad, In-Page Push, atau display ad setelah player.',
         'preview' => '/v/B4Dc0JUWc',
     ],
+    'player_related' => [
+        'title' => 'Player • Sebelum Related',
+        'description' => 'Di atas daftar video terkait pada halaman tonton.',
+        'recommended' => 'Banner responsif atau Native Banner.',
+        'preview' => '/v/B4Dc0JUWc',
+    ],
+    'album_top' => [
+        'title' => 'Kategori • Sebelum Daftar Video',
+        'description' => 'Di atas daftar video pada halaman kategori dan koleksi.',
+        'recommended' => 'Banner responsif atau Native Banner.',
+        'preview' => '/',
+    ],
     'footer' => [
         'title' => 'Iklan Footer',
         'description' => 'Banner di atas footer halaman publik.',
@@ -77,21 +101,20 @@ if (!isset($slotDefinitions[$slotName])) {
 $current = ad_config();
 $slot = is_array($current['slots'][$slotName] ?? null) ? $current['slots'][$slotName] : [];
 $label = trim((string) ($slot['label'] ?? '')) ?: $slotDefinitions[$slotName]['title'];
+
+// Slot dari ad_config() sudah kanonik (desktop/mobile), jadi tidak ada lagi
+// bentuk lama yang perlu ditebak di sini.
 $desktop = ad_slot_variant($slot, 'desktop');
 $mobile = ad_slot_variant($slot, 'mobile');
-$code = trim((string) ($slot['code'] ?? ''));
-$target = (string) ($slot['target'] ?? '');
-if ($code === '') {
-    $code = trim((string) ($mobile['code'] ?? '')) !== ''
-        ? (string) $mobile['code']
-        : (string) ($desktop['code'] ?? '');
-}
-if (!in_array($target, ['mobile', 'desktop', 'all'], true)) {
-    $target = !empty($mobile['active']) && !empty($desktop['active'])
-        ? 'all'
-        : (!empty($mobile['active']) ? 'mobile' : 'desktop');
-}
-$active = !empty($slot['active']) || !empty($mobile['active']) || !empty($desktop['active']);
+
+$desktopActive = !empty($desktop['active']);
+$mobileActive = !empty($mobile['active']);
+$desktopCode = (string) ($desktop['code'] ?? '');
+$mobileCode = (string) ($mobile['code'] ?? '');
+
+// Default "samakan": dicentang selama kedua sisi memang belum berbeda.
+$mirror = $desktopCode === $mobileCode;
+
 $error = '';
 
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
@@ -103,17 +126,26 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             throw new RuntimeException('Nama slot maksimal 100 karakter.');
         }
 
-        $active = isset($_POST['active']);
-        $target = (string) ($_POST['target'] ?? 'mobile');
-        $code = trim((string) ($_POST['code'] ?? ''));
-        if (!in_array($target, ['mobile', 'desktop', 'all'], true)) {
-            throw new RuntimeException('Pilihan perangkat tidak valid.');
-        }
-        if (strlen($code) > 250000) {
-            throw new RuntimeException('Kode iklan terlalu besar. Maksimal 250 KB.');
+        $mobileActive = isset($_POST['mobile_active']);
+        $desktopActive = isset($_POST['desktop_active']);
+        $mobileCode = trim((string) ($_POST['mobile_code'] ?? ''));
+        $desktopCode = trim((string) ($_POST['desktop_code'] ?? ''));
+        $mirror = isset($_POST['mirror']);
+
+        if ($mirror) {
+            $desktopCode = $mobileCode;
         }
 
-        // Mutasi runtime mentah agar antiblock, mobile scripts, dan slot lain tidak tertimpa.
+        foreach (['HP' => $mobileCode, 'Desktop' => $desktopCode] as $which => $code) {
+            if (strlen($code) > 250000) {
+                throw new RuntimeException(
+                    'Kode iklan ' . $which . ' terlalu besar. Maksimal 250 KB.'
+                );
+            }
+        }
+
+        // Mutasi runtime mentah agar antiblock, mobile scripts, dan slot lain
+        // tidak tertimpa.
         $runtime = ad_runtime_config();
         if (!$runtime) {
             $runtime = [
@@ -126,11 +158,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             $runtime['slots'] = [];
         }
 
+        // Selalu ditulis dalam bentuk kanonik, dan bentuk lama pada slot yang
+        // sama dibuang supaya tidak ada dua bentuk yang saling membayangi.
         $runtime['slots'][$slotName] = [
             'label' => $label,
-            'active' => $active,
-            'target' => $target,
-            'code' => $code,
+            'desktop' => ['active' => $desktopActive, 'code' => $desktopCode],
+            'mobile' => ['active' => $mobileActive, 'code' => $mobileCode],
         ];
 
         ade_write($runtime);
@@ -178,16 +211,21 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 
 <div class="ads3-warning"><strong>💡 Cocok untuk slot ini</strong><span><?= am_e($slotDefinitions[$slotName]['recommended']) ?></span></div>
 
-<label class="ads2-toggle-row"><span><strong>Aktifkan Iklan</strong><small>Satu kode untuk perangkat yang dipilih.</small></span>
-<input type="checkbox" name="active" value="1" <?= $active ? 'checked' : '' ?>></label>
-<div class="ads2-field"><label>Tampilkan di</label><select name="target">
-<option value="mobile" <?= $target === 'mobile' ? 'selected' : '' ?>>HP saja</option>
-<option value="all" <?= $target === 'all' ? 'selected' : '' ?>>HP + Desktop</option>
-<option value="desktop" <?= $target === 'desktop' ? 'selected' : '' ?>>Desktop saja</option>
-</select><small>Pilih HP + Desktop jika satu kode ingin dipakai di semua perangkat.</small></div>
-<div class="ads2-field"><label>Kode Iklan</label>
-<textarea name="code" rows="14" spellcheck="false" placeholder="Tempel satu atau beberapa kode iklan..."><?= am_e($code) ?></textarea>
+<label class="ads2-toggle-row"><span><strong>Aktifkan di HP</strong><small>Tayangkan slot ini untuk pengunjung mobile.</small></span>
+<input type="checkbox" name="mobile_active" value="1" <?= $mobileActive ? 'checked' : '' ?>></label>
+<div class="ads2-field"><label>Kode Iklan — HP</label>
+<textarea name="mobile_code" rows="12" spellcheck="false" placeholder="Tempel kode iklan untuk HP..."><?= am_e($mobileCode) ?></textarea>
 <small>Jika berisi dua banner, keduanya otomatis disusun atas–bawah dengan jarak.</small></div>
+
+<label class="ads2-toggle-row"><span><strong>Aktifkan di Desktop</strong><small>Tayangkan slot ini untuk pengunjung desktop.</small></span>
+<input type="checkbox" name="desktop_active" value="1" <?= $desktopActive ? 'checked' : '' ?>></label>
+<label class="ads2-toggle-row"><span><strong>Samakan dengan HP</strong><small>Pakai kode HP juga untuk desktop. Kotak di bawah diabaikan.</small></span>
+<input type="checkbox" name="mirror" value="1" <?= $mirror ? 'checked' : '' ?>></label>
+<div class="ads2-field"><label>Kode Iklan — Desktop</label>
+<textarea name="desktop_code" rows="12" spellcheck="false" placeholder="Tempel kode iklan khusus desktop..."><?= am_e($desktopCode) ?></textarea>
+<small>Diabaikan selama "Samakan dengan HP" masih dicentang.</small></div>
+
+<div class="ads3-warning"><strong>Kode HP dan Desktop terpisah</strong><span>Masing-masing perangkat menyimpan kodenya sendiri, jadi menyimpan slot ini tidak lagi menimpa kode perangkat lain.</span></div>
 
 <div class="ads3-warning"><strong>Catatan eksekusi</strong><span>Isi textarea dicetak sebagai HTML/JavaScript di halaman publik. Tag PHP boleh tersimpan sebagai teks, tetapi tidak dieksekusi oleh server.</span></div>
 

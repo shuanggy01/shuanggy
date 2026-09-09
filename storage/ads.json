@@ -4,9 +4,14 @@
     "slots": {
         "home_top": {
             "label": "Homepage • Atas Trending",
-            "active": true,
-            "target": "all",
-            "code": "<script>\r\n  atOptions = {\r\n    'key' : '71db6cb01ab16c8a4ea9184db697c300',\r\n    'format' : 'iframe',\r\n    'height' : 50,\r\n    'width' : 320,\r\n    'params' : {}\r\n  };\r\n</script>\r\n<script src=\"https://embargotechniquebattle.com/71db6cb01ab16c8a4ea9184db697c300/invoke.js\"></script>"
+            "desktop": {
+                "active": true,
+                "code": "<script>\r\n  atOptions = {\r\n    'key' : '71db6cb01ab16c8a4ea9184db697c300',\r\n    'format' : 'iframe',\r\n    'height' : 50,\r\n    'width' : 320,\r\n    'params' : {}\r\n  };\r\n</script>\r\n<script src=\"https://embargotechniquebattle.com/71db6cb01ab16c8a4ea9184db697c300/invoke.js\"></script>"
+            },
+            "mobile": {
+                "active": true,
+                "code": "<script>\r\n  atOptions = {\r\n    'key' : '71db6cb01ab16c8a4ea9184db697c300',\r\n    'format' : 'iframe',\r\n    'height' : 50,\r\n    'width' : 320,\r\n    'params' : {}\r\n  };\r\n</script>\r\n<script src=\"https://embargotechniquebattle.com/71db6cb01ab16c8a4ea9184db697c300/invoke.js\"></script>"
+            }
         },
         "home_mid": {
             "label": "Homepage • Sebelum Video Terbaru",
@@ -32,15 +37,25 @@
         },
         "player_before_play": {
             "label": "Player • Before Play",
-            "active": true,
-            "target": "all",
-            "code": ""
+            "desktop": {
+                "active": true,
+                "code": ""
+            },
+            "mobile": {
+                "active": true,
+                "code": ""
+            }
         },
         "player_below": {
             "label": "Player • Bawah Video",
-            "active": true,
-            "target": "all",
-            "code": "<script>\r\n  atOptions = {\r\n    'key' : '8e43937b0e2129afc68b3569253f2b42',\r\n    'format' : 'iframe',\r\n    'height' : 250,\r\n    'width' : 300,\r\n    'params' : {}\r\n  };\r\n</script>\r\n<script src=\"https://embargotechniquebattle.com/8e43937b0e2129afc68b3569253f2b42/invoke.js\"></script>"
+            "desktop": {
+                "active": true,
+                "code": "<script>\r\n  atOptions = {\r\n    'key' : '8e43937b0e2129afc68b3569253f2b42',\r\n    'format' : 'iframe',\r\n    'height' : 250,\r\n    'width' : 300,\r\n    'params' : {}\r\n  };\r\n</script>\r\n<script src=\"https://embargotechniquebattle.com/8e43937b0e2129afc68b3569253f2b42/invoke.js\"></script>"
+            },
+            "mobile": {
+                "active": true,
+                "code": "<script>\r\n  atOptions = {\r\n    'key' : '8e43937b0e2129afc68b3569253f2b42',\r\n    'format' : 'iframe',\r\n    'height' : 250,\r\n    'width' : 300,\r\n    'params' : {}\r\n  };\r\n</script>\r\n<script src=\"https://embargotechniquebattle.com/8e43937b0e2129afc68b3569253f2b42/invoke.js\"></script>"
+            }
         },
         "player_related": {
             "label": "Player • Sebelum Related Video",
@@ -77,15 +92,25 @@
         },
         "footer": {
             "label": "Footer • Bawah Halaman",
-            "active": true,
-            "target": "all",
-            "code": "<script async=\"async\" data-cfasync=\"false\" src=\"https://embargotechniquebattle.com/ae8ba5b07888e2501cf327e710a2eefc/invoke.js\"></script>\r\n<div id=\"container-ae8ba5b07888e2501cf327e710a2eefc\"></div>"
+            "desktop": {
+                "active": true,
+                "code": "<script async=\"async\" data-cfasync=\"false\" src=\"https://embargotechniquebattle.com/ae8ba5b07888e2501cf327e710a2eefc/invoke.js\"></script>\r\n<div id=\"container-ae8ba5b07888e2501cf327e710a2eefc\"></div>"
+            },
+            "mobile": {
+                "active": true,
+                "code": "<script async=\"async\" data-cfasync=\"false\" src=\"https://embargotechniquebattle.com/ae8ba5b07888e2501cf327e710a2eefc/invoke.js\"></script>\r\n<div id=\"container-ae8ba5b07888e2501cf327e710a2eefc\"></div>"
+            }
         },
         "player_before_play_2": {
             "label": "Player • Sebelum Play 2",
-            "active": false,
-            "target": "all",
-            "code": ""
+            "desktop": {
+                "active": false,
+                "code": ""
+            },
+            "mobile": {
+                "active": false,
+                "code": ""
+            }
         }
     },
     "antiblock": {
