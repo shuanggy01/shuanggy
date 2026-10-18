@@ -15,7 +15,7 @@ require ROOT.'/app/posts.php';
 $site=settings();$hasToken=array_key_exists('play',$_GET);
 $id=(string)($_GET['v']??'');$video=$hasToken?findVideoByToken((string)$_GET['play']):($id!==''?findVideo($id):null);
 if($hasToken)$id=$video?$video['id']:'invalid-play-token';
-if(!$hasToken&&$video&&!empty($site['pretty_links'])&&str_starts_with(postPath($video,$site),'/index.php?play=')){header('Location: '.postPath($video,$site),true,302);exit;}
+if(!$hasToken&&$video&&!empty($site['pretty_links'])&&str_starts_with(postPath($video,$site),'/?play=')){header('Location: '.postPath($video,$site),true,302);exit;}
 $extra=$id!==''&&!$video?extraPost($id):null;
 if($extra&&$extra['kind']==='link'){header('Location: '.$extra['url'],true,302);exit;}
 if($id!==''&&!$video&&!$extra)http_response_code(404);

@@ -13,8 +13,9 @@ function decodeVideoToken(string $token): ?string {
 }
 function postPath(array $video,?array $site=null): string {
     $site=$site??settings();$url=(string)($video['video_url']??'');
-    if(!empty($site['pretty_links'])&&decodeVideoToken(videoToken($url))!==null)return '/index.php?play='.videoToken($url);
-    return '/index.php?v='.rawurlencode($video['id']);
+    // Short links without index.php; old /index.php?v= and ?play= links keep working.
+    if(!empty($site['pretty_links'])&&decodeVideoToken(videoToken($url))!==null)return '/?play='.videoToken($url);
+    return '/?v='.rawurlencode($video['id']);
 }
 // "Putar lewat Worker" on: MP4/WebM and thumbnails load from /media/BASE64 on this
 // domain, so the CDN domain is not written in the page. Requires the Worker route
