@@ -23,3 +23,8 @@ body:not(.watch-page) .top-ad{padding:0 16px;margin-top:16px}
  body.watch-page.has-top-ad .top-ad{grid-row:2;margin:6px auto 0;padding:0 10px}
  body.watch-page.has-top-ad .viewer-main{grid-row:3}
 }
+
+/* Grid cards: smaller, lighter titles clamped to 2 lines so rows stay even. */
+.public-video h2{min-height:2.7em;font-size:13px;font-weight:500;line-height:1.35;letter-spacing:0;margin:0 0 3px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden;overflow-wrap:anywhere}
+.public-video p{font-size:11px;margin:0}
+@media(max-width:720px){.public-video h2{font-size:12px}.public-video p{font-size:10.5px}}
