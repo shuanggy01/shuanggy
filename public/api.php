@@ -4,7 +4,8 @@ require ROOT.'/app/R2.php';
 require ROOT.'/app/posts.php';
 if($_SERVER['REQUEST_METHOD']!=='POST')fail('Gunakan POST.',405);
 csrf();
-$input=json_decode(file_get_contents('php://input'),true);if(!is_array($input))fail('Data tidak valid.');
+// Thumbnail uploads arrive as multipart form data; everything else is JSON.
+$input=str_starts_with((string)($_SERVER['CONTENT_TYPE']??''),'multipart/form-data')?$_POST:json_decode(file_get_contents('php://input'),true);if(!is_array($input))fail('Data tidak valid.');
 $action=(string)($input['action']??'');
 try {
     if($action==='view') {
@@ -45,6 +46,26 @@ try {
         initPostTables();db()->prepare('DELETE FROM collections WHERE id=?')->execute([(string)($input['id']??'')]);jsonOut(['ok'=>true]);
     case 'video_edit':
         $title=trim((string)($input['title']??''));if($title===''||strlen($title)>600)throw new RuntimeException('Judul tidak valid.');db()->prepare('UPDATE videos SET title=? WHERE id=?')->execute([$title,(string)($input['id']??'')]);jsonOut(['ok'=>true]);
+    case 'thumb_upload':
+        $v=findVideo((string)($input['id']??''));if(!$v)throw new RuntimeException('Video tidak ditemukan.');
+        $f=$_FILES['thumb']??null;if(!is_array($f)||$f['error']!==UPLOAD_ERR_OK||!is_uploaded_file($f['tmp_name']))throw new RuntimeException('Upload gagal. Pilih gambar maksimal 5 MB.');
+        if($f['size']>5*1024*1024)throw new RuntimeException('Gambar maksimal 5 MB.');
+        // Trust the decoded image type, never the browser-supplied name or MIME.
+        $info=@getimagesize($f['tmp_name']);$types=[IMAGETYPE_JPEG=>'jpg',IMAGETYPE_PNG=>'png',IMAGETYPE_WEBP=>'webp'];
+        if(!$info||!isset($types[$info[2]]))throw new RuntimeException('Gunakan gambar JPG, PNG, atau WebP.');
+        $name=$v['id'].'-'.bin2hex(random_bytes(4)).'.'.$types[$info[2]];$r2=setting('r2',[]);
+        if(!empty($r2['secret'])&&!empty($r2['public'])){$key='thumbs/'.$name;(new R2(r2Config()))->request('PUT',$key,[],(string)file_get_contents($f['tmp_name']),$info['mime']);$url=publicObject($key);}
+        else{
+            $dir=ROOT.'/public/thumbs';if(!is_dir($dir)&&!@mkdir($dir,0755,true))throw new RuntimeException('Folder public/thumbs tidak bisa dibuat. Periksa izin folder di aaPanel.');
+            if(!is_file($dir.'/.htaccess'))@file_put_contents($dir.'/.htaccess',"Options -Indexes\n<FilesMatch \"(?i)\\.(php\\d?|phtml|phar|html?|js)$\">\nRequire all denied\n</FilesMatch>\n");
+            if(!move_uploaded_file($f['tmp_name'],$dir.'/'.$name))throw new RuntimeException('Gambar tidak bisa disimpan. Periksa izin folder public/thumbs.');
+            $https=!empty($_SERVER['HTTPS'])&&$_SERVER['HTTPS']!=='off'||($_SERVER['HTTP_X_FORWARDED_PROTO']??'')==='https';
+            $url=($https?'https':'http').'://'.preg_replace('/[^a-z0-9.:-]/i','',(string)($_SERVER['HTTP_HOST']??'localhost')).'/thumbs/'.$name;
+        }
+        db()->prepare('UPDATE videos SET thumb_url=? WHERE id=?')->execute([$url,$v['id']]);jsonOut(['ok'=>true,'thumb_url'=>$url]);
+    case 'thumb_set':
+        $v=findVideo((string)($input['id']??''));if(!$v)throw new RuntimeException('Video tidak ditemukan.');
+        $url=validUrl((string)($input['url']??''));db()->prepare('UPDATE videos SET thumb_url=? WHERE id=?')->execute([$url,$v['id']]);jsonOut(['ok'=>true,'thumb_url'=>$url]);
     case 'video_delete':
         // Remove publication only. Objects are retained deliberately; no silent destructive deletion.
         db()->prepare('DELETE FROM videos WHERE id=?')->execute([(string)($input['id']??'')]);jsonOut(['ok'=>true]);

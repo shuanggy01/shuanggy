@@ -3,3 +3,4 @@
 /app/bot-access.php
 # Data runtime (SQLite, sesi)
 /var/
+/public/thumbs/

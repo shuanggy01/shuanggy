@@ -41,7 +41,7 @@ session_write_close();
 <body class="download-body"><main class="download-main"><article class="download-card">
 <p class="download-label">DOWNLOAD VIDEO</p>
 <h1 class="download-title"><?=h($v['title'])?></h1>
-<img class="download-cover" src="<?=h($v['thumb_url']?:'assets/placeholder.svg')?>" alt="Thumbnail video" width="1280" height="720">
+<img class="download-cover" src="<?=h(thumbSource($v,$site))?>" alt="Thumbnail video" width="1280" height="720">
 <div class="download-meta"><span id="download-duration" hidden></span><span>Format: <?=h($format)?></span></div>
 <?php adBanner($site);?>
 <section class="download-wait" aria-label="Persiapan unduhan" data-id="<?=h($id)?>" data-remaining="<?=$remaining?>" data-total="<?=$waitSeconds?>">

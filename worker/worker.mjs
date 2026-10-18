@@ -2,6 +2,8 @@
 // No R2 credentials required: sources are public HTTPS MP4/WebM URLs.
 const NO_CACHE={cacheEverything:false,cacheTtlByStatus:{'100-599':-1}};
 const tokenPattern=/^[A-Za-z0-9_-]+$/;
+// Video plus thumbnail images, so the CDN domain never appears in the page.
+const MEDIA_EXT=/\.(mp4|webm|jpe?g|png|webp)$/i,IMAGE_EXT=/\.(jpe?g|png|webp)$/i;
 function hosts(value){return new Set(String(value||'').split(',').map(s=>s.trim().toLowerCase()).filter(Boolean));}
 function error(message,status=400){return new Response(message,{status,headers:{'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});}
 function decodeToken(token){
@@ -11,12 +13,12 @@ function decodeToken(token){
   const raw=new TextDecoder('utf-8',{fatal:true}).decode(bytes);
   if(bytes.length>4096||/[\x00-\x20\x7f]/.test(raw))throw Error('url');
   const target=new URL(raw);
-  if(target.protocol!=='https:'||target.username||target.password||target.port||target.hash||!/\.(mp4|webm)$/i.test(target.pathname))throw Error('url');
+  if(target.protocol!=='https:'||target.username||target.password||target.port||target.hash||!MEDIA_EXT.test(target.pathname))throw Error('url');
   return target;
 }
 function allowedTarget(target,allowed,players){
   return target.protocol==='https:'&&!target.username&&!target.password&&!target.port&&!target.hash&&
-    allowed.has(target.hostname)&&!players.has(target.hostname)&&/\.(mp4|webm)$/i.test(target.pathname);
+    allowed.has(target.hostname)&&!players.has(target.hostname)&&MEDIA_EXT.test(target.pathname);
 }
 async function cancel(response){try{await response.body?.cancel();}catch{}}
 async function media(request,url,env,players){
@@ -43,12 +45,14 @@ async function media(request,url,env,players){
     const status=upstream.status===404?404:502;await cancel(upstream);return error('File video belum tersedia.',status);
   }
   const type=(upstream.headers.get('Content-Type')||'').split(';')[0].trim().toLowerCase();
-  if([200,206].includes(upstream.status)&&!['video/mp4','video/webm','application/octet-stream','binary/octet-stream'].includes(type)){
-    await cancel(upstream);return error('Respons sumber bukan file MP4/WebM.',502);
+  const image=IMAGE_EXT.test(target.pathname);
+  const okTypes=image?['image/jpeg','image/png','image/webp','application/octet-stream','binary/octet-stream']:['video/mp4','video/webm','application/octet-stream','binary/octet-stream'];
+  if([200,206].includes(upstream.status)&&!okTypes.includes(type)){
+    await cancel(upstream);return error('Respons sumber bukan file video/gambar yang didukung.',502);
   }
-  const out=new Headers({'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','Cross-Origin-Resource-Policy':'same-origin','X-Frame-Options':'SAMEORIGIN'});
+  const out=new Headers({'Cache-Control':image?'public, max-age=86400':'private, no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','Cross-Origin-Resource-Policy':'same-origin','X-Frame-Options':'SAMEORIGIN'});
   for(const name of ['Content-Length','Content-Range','Accept-Ranges','ETag','Last-Modified','Content-Encoding'])if(upstream.headers.has(name))out.set(name,upstream.headers.get(name));
-  if([200,206].includes(upstream.status))out.set('Content-Type',/\.webm$/i.test(target.pathname)?'video/webm':'video/mp4');
+  if([200,206].includes(upstream.status))out.set('Content-Type',image?({png:'image/png',webp:'image/webp'}[target.pathname.split('.').pop().toLowerCase()]||'image/jpeg'):(/\.webm$/i.test(target.pathname)?'video/webm':'video/mp4'));
   if(url.searchParams.get('download')==='1')out.set('Content-Disposition','attachment; filename="video.'+(/\.webm$/i.test(target.pathname)?'webm':'mp4')+'"');
   else out.set('Content-Disposition','inline');
   if(request.method==='HEAD'||[304,416].includes(upstream.status)){

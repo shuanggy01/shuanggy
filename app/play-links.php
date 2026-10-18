@@ -1,6 +1,6 @@
 <?php
 function playableProxyUrl(string $url): bool {
-    return strlen($url)<=4096 && preg_match('~\.(mp4|webm)$~i',(string)parse_url($url,PHP_URL_PATH))===1;
+    return strlen($url)<=4096 && preg_match('~\.(mp4|webm|jpe?g|png|webp)$~i',(string)parse_url($url,PHP_URL_PATH))===1;
 }
 function videoToken(string $url): string {return rtrim(strtr(base64_encode($url),'+/','-_'),'=');}
 function decodeVideoToken(string $token): ?string {
@@ -16,11 +16,16 @@ function postPath(array $video,?array $site=null): string {
     if(!empty($site['pretty_links'])&&decodeVideoToken(videoToken($url))!==null)return '/index.php?play='.videoToken($url);
     return '/index.php?v='.rawurlencode($video['id']);
 }
-function videoSource(array $video,array $site): string {
-    // V5.1: playback uses the original CDN URL, including when a saved V5
-    // media_proxy flag is still true. No Worker deployment is required.
-    return (string)$video['video_url'];
+// "Putar lewat Worker" on: MP4/WebM and thumbnails load from /media/BASE64 on this
+// domain, so the CDN domain is not written in the page. Requires the Worker route
+// viduk.fun/media/*. HLS (.m3u8) and other URLs keep loading directly.
+function mediaPath(string $url,array $site): string {
+    // Files already on this domain (e.g. /thumbs uploads) stay as a plain path.
+    if($url!==''&&strcasecmp((string)parse_url($url,PHP_URL_HOST),(string)($_SERVER['HTTP_HOST']??''))===0)return (string)parse_url($url,PHP_URL_PATH);
+    return !empty($site['media_proxy'])&&$url!==''&&decodeVideoToken(videoToken($url))!==null?'/media/'.videoToken($url):$url;
 }
+function videoSource(array $video,array $site): string {return mediaPath((string)$video['video_url'],$site);}
+function thumbSource(array $video,array $site): string {$t=(string)($video['thumb_url']??'');return $t===''?'assets/placeholder.svg':mediaPath($t,$site);}
 function findVideoByToken(string $token): ?array {
     $url=decodeVideoToken($token);if($url===null)return null;
     // Only registered videos become watch pages; this does not auto-publish arbitrary URLs.

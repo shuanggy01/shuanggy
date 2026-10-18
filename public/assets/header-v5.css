@@ -1,5 +1,7 @@
-.viewer-header.promo-header{justify-content:center;text-align:center;padding:10px 12px 9px}
-.promo-header .promo-brand{display:flex;flex-direction:column;align-items:center;gap:1px;max-width:100%;line-height:1.05;color:#fff;text-decoration:none}
-.promo-brand strong{font-size:clamp(23px,5vw,34px);font-weight:900;letter-spacing:-.7px;text-shadow:0 0 3px #fff,0 0 7px #ff249d,0 0 15px #ff249d,0 0 23px #e00075}
-.promo-brand small{font-size:clamp(14px,3.5vw,19px);font-weight:800;text-shadow:0 0 3px #ff249d,0 0 6px #ff249d,0 0 12px #ff249d}
-@media(max-width:767px){.watch-page .viewer-header.promo-header{padding-top:calc(8px + env(safe-area-inset-top,0px));padding-bottom:8px}}
+.viewer-header.promo-header{justify-content:center;text-align:center;padding:10px 12px 12px}
+.promo-cta{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;max-width:460px;color:#fff;text-decoration:none}
+.promo-cta span{font-size:clamp(15px,4vw,19px);font-weight:600;letter-spacing:.2px;text-shadow:0 1px 8px #000a}
+.promo-cta strong{display:block;width:100%;padding:11px 18px;border-radius:999px;background:var(--accent);color:#fff;font-size:clamp(15px,4vw,18px);font-weight:800;font-style:italic;letter-spacing:.2px;box-shadow:0 0 22px #ff249d80,inset 0 0 12px #ffffff30;transition:transform .15s,filter .15s}
+.promo-cta:hover strong,.promo-cta:focus-visible strong{filter:brightness(1.1);transform:translateY(-1px)}
+.promo-cta:active strong{transform:translateY(1px)}
+@media(max-width:767px){.watch-page .viewer-header.promo-header{padding-top:calc(8px + env(safe-area-inset-top,0px));padding-bottom:10px}}
