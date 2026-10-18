@@ -9,7 +9,10 @@ if(document.readyState==='complete')preload();else addEventListener('load',prelo
 const message=text=>{$('#player-message').textContent=text;$('#player-message').hidden=!text;};
 function clearAd(){generation++;clearInterval(timer);clearTimeout(watchdog);adCleanup();adCleanup=()=>{};if(adVideo){adVideo.pause();adVideo.removeAttribute('src');adVideo.load();adVideo=null;}content.replaceChildren();layer.classList.remove('ad-on','ad-done');layer.onclick=null;tap.hidden=true;tap.onclick=null;for(const f of frames.children)f.classList.remove('on');count.textContent='';}
 function safePlay(v,onBlocked){const p=v.play();if(p&&p.catch)p.catch(onBlocked);}
-function playMain(){clearAd();setTimeout(loadPopup,1200);state='main';start.hidden=true;controls.hidden=false;message('');safePlay(video,()=>{message('Ketuk ▶ untuk melanjutkan video.');$('#toggle-play').textContent='▶';});}
+// The video URL is attached only here (after the start tap and pre-roll), so download
+// managers find nothing before the viewer actually plays.
+function attachSource(){if(!video.getAttribute('src')&&config.m){try{video.src=atob(config.m);}catch{}}}
+function playMain(){clearAd();attachSource();setTimeout(loadPopup,1200);state='main';start.hidden=true;controls.hidden=false;message('');safePlay(video,()=>{message('Ketuk ▶ untuk melanjutkan video.');$('#toggle-play').textContent='▶';});}
 function advance(){if(state==='main'||state==='ended')return;clearAd();index++;if(index>=stages.length){playMain();return;}state='ad';showAd(stages[index],false);}
 
 // Ad frames are created ahead of time (inside the invisible layer) so they are already loaded when shown.
