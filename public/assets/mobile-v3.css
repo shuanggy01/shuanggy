@@ -65,3 +65,5 @@
  .download-help{font-size:12px}
  .download-back{font-size:13px;margin-top:18px}
 }
+.custom-controls{transition:opacity .25s}
+.custom-controls.ctl-hide{opacity:0;pointer-events:none}

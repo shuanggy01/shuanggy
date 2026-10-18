@@ -56,8 +56,18 @@ function showAd(ad,resume){
   if(left)timer=setInterval(()=>{if(!document.hidden)left=Math.max(0,left-1);tick();if(!left)clearInterval(timer);},1000);
 }
 $('#start-play').onclick=()=>{if(state!=='idle')return;const gate=window.vidukAgeGate;if(gate&&!gate.done){gate.open(advance);return;}advance();};
+// Controls fade out 1s after the last touch while playing; any touch brings them back (that touch only reveals them).
+let hideTimer=null,revealed=false;
+const ctlShow=()=>{clearTimeout(hideTimer);controls.classList.remove('ctl-hide');};
+function ctlWake(){ctlShow();if(state==='main'&&!video.paused&&!video.ended)hideTimer=setTimeout(()=>{if(state==='main'&&!video.paused&&!seeking)controls.classList.add('ctl-hide');},1000);}
+let seeking=false;
+shell.addEventListener('pointerdown',e=>{revealed=controls.classList.contains('ctl-hide')&&!controls.hidden;if(e.target.closest&&e.target.closest('#seek'))seeking=true;ctlWake();},true);
+['pointerup','pointercancel'].forEach(t=>addEventListener(t,()=>{if(seeking){seeking=false;ctlWake();}},true));
+shell.addEventListener('pointermove',e=>{if(e.pointerType==='mouse')ctlWake();});
+video.addEventListener('play',ctlWake);video.addEventListener('playing',ctlWake);
+['pause','ended','waiting'].forEach(t=>video.addEventListener(t,ctlShow));
 function toggle(){if(state!=='main'&&state!=='ended')return;if(video.paused){if(state==='ended'){state='main';video.currentTime=0;}message('');safePlay(video,()=>message('Video belum bisa diputar. Coba lagi.'));}else video.pause();}
-$('#toggle-play').onclick=toggle;video.addEventListener('click',()=>{if(state==='idle')$('#start-play').click();else toggle();});
+$('#toggle-play').onclick=toggle;video.addEventListener('click',()=>{if(state==='idle')$('#start-play').click();else if(!revealed)toggle();});
 video.addEventListener('play',()=>{if(!['main','ended'].includes(state)){video.pause();return;}state='main';$('#toggle-play').textContent='Ⅱ';$('#toggle-play').setAttribute('aria-label','Jeda');message('');});
 video.addEventListener('pause',()=>{if(state!=='main')return;$('#toggle-play').textContent='▶';$('#toggle-play').setAttribute('aria-label','Putar');if(pauseAd&&!video.ended){state='pause';showAd(pauseAd,true);}});
 video.addEventListener('ended',()=>{clearAd();state='ended';controls.hidden=false;$('#toggle-play').textContent='↻';$('#toggle-play').setAttribute('aria-label','Putar ulang');});
