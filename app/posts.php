@@ -9,6 +9,20 @@ function extraPost(string $id): ?array {
     $q=db()->prepare('SELECT *, "folder" AS kind FROM collections WHERE id=?');$q->execute([$id]);$r=$q->fetch();if($r)return $r;
     $q=db()->prepare('SELECT *, "link" AS kind FROM external_links WHERE id=?');$q->execute([$id]);return $q->fetch()?:null;
 }
+// Same rules for folders from the bot and from the admin studio.
+function folderItems(string $id,array $raw): array {
+    $items=array_values(array_unique(array_filter(array_map(fn($v)=>trim((string)$v),$raw))));
+    if(!$items||count($items)>500)throw new RuntimeException('Folder harus berisi 1–500 posting.');
+    foreach($items as $child){if(!preg_match('/^[a-zA-Z0-9_-]{4,40}$/',$child)||$child===$id)throw new RuntimeException('Isi folder tidak valid.');$other=extraPost($child);if(!findVideo($child)&&(!$other||$other['kind']!=='link'))throw new RuntimeException('Video/link isi folder belum tersedia: '.$child);}
+    return $items;
+}
+function listFolders(): array {initPostTables();return db()->query('SELECT * FROM collections ORDER BY created_at DESC')->fetchAll();}
+function updateFolder(string $id,string $title,array $raw): void {
+    initPostTables();$title=trim($title);
+    if($title===''||strlen($title)>600)throw new RuntimeException('Judul folder harus diisi, maksimal 600 byte.');
+    $folder=extraPost($id);if(!$folder||$folder['kind']!=='folder')throw new RuntimeException('Folder tidak ditemukan.');
+    db()->prepare('UPDATE collections SET title=?,items=? WHERE id=?')->execute([$title,json_encode(folderItems($id,$raw)),$id]);
+}
 function registerPost(string $id,string $title,string $type,string $value): array {
     initPostTables();$title=trim($title);
     if(!preg_match('/^[a-zA-Z0-9_-]{4,40}$/',$id))throw new RuntimeException('ID posting tidak valid.');
@@ -20,9 +34,7 @@ function registerPost(string $id,string $title,string $type,string $value): arra
         $ext=strtolower(pathinfo(parse_url($videoUrl,PHP_URL_PATH)??'',PATHINFO_EXTENSION));
         if(!in_array($ext,['mp4','webm','m3u8'],true))throw new RuntimeException('Gunakan URL video langsung .mp4, .webm, atau .m3u8.');
     }elseif($type==='folder'){
-        $items=array_values(array_unique(array_filter(array_map('trim',explode(',',$value)))));
-        if(!$items||count($items)>500)throw new RuntimeException('Folder harus berisi 1–500 posting.');
-        foreach($items as $child){if(!preg_match('/^[a-zA-Z0-9_-]{4,40}$/',$child)||$child===$id)throw new RuntimeException('Isi folder tidak valid.');$other=extraPost($child);if(!findVideo($child)&&(!$other||$other['kind']!=='link'))throw new RuntimeException('Video/link isi folder belum tersedia: '.$child);}
+        $items=folderItems($id,explode(',',$value));
     }else $url=validUrl($value,false);
     db()->exec('BEGIN IMMEDIATE');
     try {

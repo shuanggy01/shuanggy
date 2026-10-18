@@ -31,7 +31,18 @@ try {
         $id=bin2hex(random_bytes(6));$title=(string)($input['title']??'');
         $video=(string)($input['video_url']??'');$thumb=(string)($input['thumb_url']??'');
         if(str_contains($video,'||')||str_contains($thumb,'||'))throw new RuntimeException('URL tidak valid.');
-        jsonOut(registerPost($id,$title,'video',$video.'||'.$thumb));
+        $out=registerPost($id,$title,'video',$video.'||'.$thumb);
+        $folderId=(string)($input['folder']??'');
+        if($folderId!==''){$folder=extraPost($folderId);if(!$folder||$folder['kind']!=='folder')throw new RuntimeException('Video terbit, tetapi folder tidak ditemukan.');updateFolder($folderId,$folder['title'],[...json_decode($folder['items'],true),$id]);}
+        jsonOut($out);
+    case 'folder_save':
+        $items=$input['items']??[];if(!is_array($items))throw new RuntimeException('Isi folder tidak valid.');
+        $folderId=(string)($input['id']??'');$title=(string)($input['title']??'');
+        if($folderId==='')jsonOut(registerPost(bin2hex(random_bytes(6)),$title,'folder',implode(',',array_map('strval',$items))));
+        updateFolder($folderId,$title,$items);jsonOut(['ok'=>true,'id'=>$folderId]);
+    case 'folder_delete':
+        // Removes the folder only; its videos stay published.
+        initPostTables();db()->prepare('DELETE FROM collections WHERE id=?')->execute([(string)($input['id']??'')]);jsonOut(['ok'=>true]);
     case 'video_edit':
         $title=trim((string)($input['title']??''));if($title===''||strlen($title)>600)throw new RuntimeException('Judul tidak valid.');db()->prepare('UPDATE videos SET title=? WHERE id=?')->execute([$title,(string)($input['id']??'')]);jsonOut(['ok'=>true]);
     case 'video_delete':
