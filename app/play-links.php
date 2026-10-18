@@ -41,7 +41,15 @@ function mediaPath(string $url,array $site,bool $video=true): string {
     if(empty($site['media_proxy'])||$url===''||decodeVideoToken(videoToken($url))===null)return $url;
     return '/media/'.(mediaKey()!==''?sealMedia($url,$video,$site):videoToken($url));
 }
-function videoSource(array $video,array $site): string {return mediaPath((string)$video['video_url'],$site);}
+// External proxy (e.g. proxy-master on v.videy.ca): videos on the listed hosts play from
+// "Proxy video" + Base64(URL), the same format videy.ca uses. Takes priority over /media/.
+function externalProxy(string $url,array $site): ?string {
+    $base=trim((string)($site['video_proxy']??''));
+    if($base===''||!preg_match('~\.(mp4|webm)$~i',(string)parse_url($url,PHP_URL_PATH)))return null;
+    $hosts=array_filter(array_map(fn($h)=>strtolower(trim($h)),explode(',',(string)($site['video_proxy_hosts']??''))));
+    return in_array(strtolower((string)parse_url($url,PHP_URL_HOST)),$hosts,true)?$base.videoToken($url):null;
+}
+function videoSource(array $video,array $site): string {return externalProxy((string)$video['video_url'],$site)??mediaPath((string)$video['video_url'],$site);}
 // Thumbnails are not time/IP locked: link previews (Telegram, etc.) fetch them from their own servers.
 function thumbSource(array $video,array $site): string {$t=(string)($video['thumb_url']??'');return $t===''?'assets/placeholder.svg':mediaPath($t,$site,false);}
 function findVideoByToken(string $token): ?array {

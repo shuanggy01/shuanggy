@@ -16,6 +16,7 @@ if(isset($_GET['file'])){
     session_write_close();
     $source=videoSource($v,$site);
     if(str_starts_with($source,'/media/')){header('Location: '.$source.'?download=1',true,302);exit;}
+    if($source!==$v['video_url']){header('Location: '.$source,true,302);exit;}
 
     if($v['video_key']===''){header('Location: '.$v['video_url'],true,302);exit;}
     try{

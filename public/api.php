@@ -18,6 +18,13 @@ try {
     case 'settings':
         $site=settings();$site['site_name']=substr(trim((string)($input['site_name']??'Layar')),0,80)?:'Layar';$site['vip_url']=validUrl((string)($input['vip_url']??''));$site['download']=!empty($input['download']);
         foreach(['pretty_links','media_proxy','media_ip_lock'] as $flag)if(array_key_exists($flag,$input))$site[$flag]=!empty($input[$flag]);
+        if(array_key_exists('video_proxy',$input)){
+            $proxy=trim((string)$input['video_proxy']);if($proxy!==''&&!preg_match('~^https://[a-z0-9.-]+(:\d+)?/[^\s?#]*$~i',$proxy))throw new RuntimeException('Proxy video harus berupa https://domain/path/, misal https://v.videy.ca/play/');
+            $site['video_proxy']=$proxy;
+            $hosts=array_filter(array_map(fn($h)=>strtolower(trim($h)),explode(',',(string)($input['video_proxy_hosts']??''))));
+            foreach($hosts as $h)if(!preg_match('/^[a-z0-9.-]+\.[a-z]{2,}$/',$h))throw new RuntimeException('Domain sumber tidak valid: '.$h);
+            $site['video_proxy_hosts']=implode(',',$hosts);
+        }
         $ads=validateAds($input['ads']??[],$site['ads']);
         $site['ads']=$ads;putSetting('site',$site);jsonOut(['ok'=>true]);
     case 'media_key':

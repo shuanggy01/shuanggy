@@ -73,7 +73,7 @@ function validUrl(string $url,bool $optional=true): string {
 require_once __DIR__.'/ads.php';
 require_once __DIR__.'/play-links.php';
 function defaults(): array {
-    return ['site_name'=>'Layar','vip_url'=>'','download'=>true,'pretty_links'=>false,'media_proxy'=>false,'media_ip_lock'=>true,'ads'=>adDefaults()];
+    return ['site_name'=>'Layar','vip_url'=>'','download'=>true,'pretty_links'=>false,'media_proxy'=>false,'media_ip_lock'=>true,'video_proxy'=>'','video_proxy_hosts'=>'cdn.videy.ca','ads'=>adDefaults()];
 }
 function settings(): array {$site=array_replace(defaults(),setting('site',[]));$site['ads']=mergeAds($site['ads']??[]);return $site;}
 function encKey(): string {
