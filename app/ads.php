@@ -125,8 +125,9 @@ function adPreconnect(array $site): void {
 // screens by assets/adbox.js, so the page layout never changes.
 function adBoxSize(string $code,int $dw,int $dh): array {
     $w=$dw;$h=$dh;
-    if(preg_match('/[\'"]?width[\'"]?\s*:\s*[\'"]?(\d{2,4})/i',$code,$m))$w=max(50,min(1200,(int)$m[1]));
-    if(preg_match('/[\'"]?height[\'"]?\s*:\s*[\'"]?(\d{2,4})/i',$code,$m))$h=max(30,min(1000,(int)$m[1]));
+    // Only explicit pixel sizes count (atOptions / width="728" / width:728px); never %, max-width, etc.
+    if(preg_match('/(?<![-\w])[\'"]?width[\'"]?\s*[:=]\s*[\'"]?(\d{2,4})(?:px)?(?![\d%.\w])/i',$code,$m))$w=max(50,min(1200,(int)$m[1]));
+    if(preg_match('/(?<![-\w])[\'"]?height[\'"]?\s*[:=]\s*[\'"]?(\d{2,4})(?:px)?(?![\d%.\w])/i',$code,$m))$h=max(30,min(1000,(int)$m[1]));
     $native=!preg_match('/atOptions/i',$code)&&preg_match('/container-[A-Za-z0-9]+/',$code)===1;
     return [$w,$h,$native];
 }
@@ -136,11 +137,13 @@ function adCodeHtml(string $content): string {
     $p=adParse($c);
     if($p['kind']==='script')return '<script data-cfasync="false" src="'.h($p['url']).'"></script>';
     if($p['kind']!=='html')return '';
-    if($c[0]==='<'||preg_match('/<\s*\/?\s*(script|div|style|meta|link|iframe|img|a|span|ins|noscript)\b/i',$c))return $c;
+    $c=preg_replace('/\R\s*https?:\/\/\S+\s*$/','',$c);
+    // HTML when it starts with a tag/comment; otherwise it is JS (which may contain "<a" or "<div" in strings).
+    if($c[0]==='<')return $c;
     return '<script>'.$c.'</script>';
 }
 function adBoxMark(): void {$GLOBALS['adbox_used']=true;}
-function adBoxScript(): void {if(!empty($GLOBALS['adbox_used']))echo '<script src="assets/adbox.js?v=1" defer></script>';}
+function adBoxScript(): void {if(!empty($GLOBALS['adbox_used']))echo '<script src="assets/adbox.js?v=2" defer></script>';}
 function adFit(string $inner,int $w,int $h): string {
     return '<div class="ad-fit" data-w="'.$w.'" data-h="'.$h.'" style="--w:'.$w.';--h:'.$h.'"><div class="ad-fit-inner">'.$inner.'</div></div>';
 }
@@ -160,17 +163,20 @@ function adBanner(array $site): void {
     }echo '</aside>';
 }
 // Top banner (Adsterra 728x90): same box + scaling, so a 728px banner never widens the page.
+function adHasTop(array $site): bool {
+    $ad=adFind($site,'top_banner');return $ad&&(adParse($ad['content'])['kind']==='image'||adCodeHtml($ad['content'])!=='');
+}
 function adTopBanner(array $site): void {
     $ad=adFind($site,'top_banner');if(!$ad)return;$p=adParse($ad['content']);
     if($p['kind']==='image'){
-        $href=$p['link'];echo '<div class="ad-top ad-top-image" data-adbox>';
+        $href=$p['link'];echo '<div class="top-ad top-ad-image" data-adbox>';
         if($href!=='')echo '<a href="'.h($href).'" target="_blank" rel="noopener noreferrer sponsored">';
         echo '<img src="'.h($p['url']).'" alt="Iklan" style="max-width:100%;height:auto;display:block;margin:auto">';if($href!=='')echo '</a>';
         echo '</div>';adBoxMark();return;
     }
     $code=adCodeHtml($ad['content']);if($code==='')return;
     [$w,$h]=adBoxSize($ad['content'],728,90);adBoxMark();
-    echo '<div class="ad-top" data-adbox aria-label="Iklan">'.adFit($code,$w,$h).'</div>';
+    echo '<div class="top-ad" data-adbox aria-label="Iklan">'.adFit($code,$w,$h).'</div>';
 }
 // Verification <meta> tags are rebuilt from scratch: only name/property + content survive,
 // so nothing else (scripts, refresh, charset) can slip into <head>.
@@ -180,7 +186,7 @@ function adCleanMeta(string $raw): string {
         foreach($tags[0] as $tag){
             $attr=[];
             if(preg_match_all('/([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s"\'>\/]+))/',$tag,$m,PREG_SET_ORDER))
-                foreach($m as $x)$attr[strtolower($x[1])]=html_entity_decode($x[2]!==''?$x[2]:($x[3]!==''?$x[3]:($x[4]??'')),ENT_QUOTES,'UTF-8');
+                foreach($m as $x)$attr[strtolower($x[1])]=html_entity_decode(($x[2]??'')!==''?$x[2]:(($x[3]??'')!==''?$x[3]:($x[4]??'')),ENT_QUOTES,'UTF-8');
             $key=isset($attr['name'])?'name':(isset($attr['property'])?'property':'');
             if($key===''||!isset($attr['content'])||strlen($attr[$key])>100||strlen($attr['content'])>500)continue;
             if(!preg_match('/^[A-Za-z0-9_.:-]+$/',$attr[$key]))continue;
@@ -203,7 +209,7 @@ function adBlockCode(array $site,string $where): void {
 function adCustomCode(array $site,bool $hasPlayer): void {
     $ad=adFind($site,'custom_code');if(!$ad)return;
     $c=adCodeHtml($ad['content']);if($c==='')return;
-    if($hasPlayer&&adCleanOpt('custom_code',(string)($ad['opt']??''))==='1')echo '<script src="assets/overlay-guard.js?v=1"></script>';
+    if($hasPlayer&&adCleanOpt('custom_code',(string)($ad['opt']??''))==='1')echo '<script src="assets/overlay-guard.js?v=2"></script>';
     echo "\n".$c."\n";
 }
 function adPageEnd(array $site,bool $hasPlayer): void {adBlockCode($site,'body');adCustomCode($site,$hasPlayer);adBoxScript();}

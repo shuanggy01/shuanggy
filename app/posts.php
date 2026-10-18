@@ -25,44 +25,76 @@ function updateFolder(string $id,string $title,array $raw,bool $allowEmpty=false
     $folder=extraPost($id);if(!$folder||$folder['kind']!=='folder')throw new RuntimeException('Folder tidak ditemukan.');
     db()->prepare('UPDATE collections SET title=?,items=? WHERE id=?')->execute([$title,json_encode(folderItems($id,$raw,$allowEmpty)),$id]);
 }
+// Keep only IDs that still resolve to a video or link (folders may hold IDs of posts deleted long ago).
+function liveItems(array $items): array {
+    return array_values(array_filter(array_map('strval',$items),function($i){if(findVideo($i))return true;$o=extraPost($i);return $o&&$o['kind']==='link';}));
+}
+// Run a read-modify-write on folders under one write lock, so concurrent writers (the Telegram bot,
+// another admin tab) cannot overwrite each other with a stale list.
+function withFolderLock(callable $fn){
+    initPostTables();db()->exec('BEGIN IMMEDIATE');
+    try{$r=$fn();db()->exec('COMMIT');return $r;}catch(Throwable $e){db()->exec('ROLLBACK');throw $e;}
+}
+function setFolderItems(string $id,array $items): void {db()->prepare('UPDATE collections SET items=? WHERE id=?')->execute([json_encode(array_values($items)),$id]);}
 // Drop post IDs from every folder (a deleted video/link must not linger inside folders).
 function purgeFromFolders(array $ids): void {
     $ids=array_map('strval',$ids);
-    foreach(listFolders() as $f){
-        $items=json_decode($f['items'],true)??[];$keep=array_values(array_filter($items,fn($i)=>!in_array((string)$i,$ids,true)));
-        if(count($keep)!==count($items))db()->prepare('UPDATE collections SET items=? WHERE id=?')->execute([json_encode($keep),$f['id']]);
-    }
+    withFolderLock(function() use($ids){
+        foreach(listFolders() as $f){
+            $items=json_decode($f['items'],true)??[];$keep=array_values(array_filter($items,fn($i)=>!in_array((string)$i,$ids,true)));
+            if(count($keep)!==count($items))setFolderItems($f['id'],$keep);
+        }
+    });
 }
-// Move posts between folders: $moves = [{id, from}] (from '' = not in a folder), $to = target folder ID
-// or '' to take them out of their folder. Folders may end up empty (the admin can delete them later).
+// Move posts between folders: $moves = [{id, ...}], $to = target folder ID or '' to take them out of
+// every folder. The client's idea of the source folder is not trusted: each ID is removed from all folders.
 function moveFolderItems(array $moves,string $to): int {
-    initPostTables();$idRe='/^[a-zA-Z0-9_-]{4,40}$/';
-    $target=null;
-    if($to!==''){if(!preg_match($idRe,$to))throw new RuntimeException('Folder tujuan tidak valid.');$target=extraPost($to);if(!$target||$target['kind']!=='folder')throw new RuntimeException('Folder tujuan tidak ditemukan.');}
-    $ids=[];$bySource=[];
+    $idRe='/^[a-zA-Z0-9_-]{4,40}$/';
+    if($to!==''&&!preg_match($idRe,$to))throw new RuntimeException('Folder tujuan tidak valid.');
+    $ids=[];
     foreach($moves as $m){
-        if(!is_array($m))continue;$id=trim((string)($m['id']??''));$from=trim((string)($m['from']??''));
-        if(!preg_match($idRe,$id)||($from!==''&&!preg_match($idRe,$from)))throw new RuntimeException('ID item tidak valid.');
-        $ids[$id]=true;if($from!==''&&$from!==$to)$bySource[$from][]=$id;
+        if(!is_array($m))continue;$id=trim((string)($m['id']??''));
+        if(!preg_match($idRe,$id))throw new RuntimeException('ID item tidak valid.');
+        $ids[$id]=true;
     }
     if(!$ids)throw new RuntimeException('Pilih item yang mau dipindah.');
     if(count($ids)>500)throw new RuntimeException('Maksimal 500 item sekali pindah.');
-    db()->exec('BEGIN IMMEDIATE');
-    try{
-        foreach($bySource as $fid=>$list){
-            $src=extraPost((string)$fid);if(!$src||$src['kind']!=='folder')continue;
-            $keep=array_values(array_filter(json_decode($src['items'],true)??[],fn($i)=>!in_array((string)$i,$list,true)));
-            db()->prepare('UPDATE collections SET items=? WHERE id=?')->execute([json_encode($keep),$src['id']]);
+    $list=array_map('strval',array_keys($ids));
+    return withFolderLock(function() use($list,$to){
+        $target=null;
+        if($to!==''){$target=extraPost($to);if(!$target||$target['kind']!=='folder')throw new RuntimeException('Folder tujuan tidak ditemukan.');}
+        $existing=$target?liveItems(json_decode($target['items'],true)??[]):[];
+        foreach($list as $id)if($id===$to)throw new RuntimeException('Folder tidak bisa dimasukkan ke dirinya sendiri.');
+        foreach($list as $id)if(!findVideo($id)){$o=extraPost($id);if(!$o||$o['kind']!=='link')throw new RuntimeException('Video/link belum tersedia: '.$id);}
+        foreach(listFolders() as $f){
+            if($target&&$f['id']===$to)continue;
+            $items=json_decode($f['items'],true)??[];$keep=array_values(array_filter($items,fn($i)=>!in_array((string)$i,$list,true)));
+            if(count($keep)!==count($items))setFolderItems($f['id'],$keep);
         }
-        if($target)updateFolder($to,$target['title'],[...(json_decode($target['items'],true)??[]),...array_map('strval',array_keys($ids))]);
-        db()->exec('COMMIT');
-    }catch(Throwable $e){db()->exec('ROLLBACK');throw $e;}
-    return count($ids);
+        if($target){
+            $new=array_values(array_unique([...array_values(array_filter($existing,fn($i)=>!in_array($i,$list,true))),...$list]));
+            if(count($new)>500)throw new RuntimeException('Folder maksimal 500 item.');
+            setFolderItems($to,$new);
+        }
+        return count($list);
+    });
+}
+// Reorder a folder on the server: $order is applied to the CURRENT list. IDs the client does not know about
+// (added meanwhile, e.g. by the bot) are kept at the end; unknown IDs are ignored. Title is untouched.
+function reorderFolder(string $id,array $order): void {
+    withFolderLock(function() use($id,$order){
+        $f=extraPost($id);if(!$f||$f['kind']!=='folder')throw new RuntimeException('Folder tidak ditemukan.');
+        $cur=array_map('strval',json_decode($f['items'],true)??[]);
+        $first=array_values(array_filter(array_unique(array_map('strval',$order)),fn($i)=>in_array($i,$cur,true)));
+        setFolderItems($id,[...$first,...array_values(array_diff($cur,$first))]);
+    });
 }
 // Append posts to an existing folder (admin "Masukkan ke folder" and bot /tambah). Re-sending the same IDs is harmless.
 function appendFolder(string $id,array $raw): array {
-    $folder=extraPost($id);if(!$folder||$folder['kind']!=='folder')throw new RuntimeException('Folder tidak ditemukan: '.$id);
-    updateFolder($id,$folder['title'],[...(json_decode($folder['items'],true)??[]),...$raw]);
+    withFolderLock(function() use($id,$raw){
+        $folder=extraPost($id);if(!$folder||$folder['kind']!=='folder')throw new RuntimeException('Folder tidak ditemukan: '.$id);
+        updateFolder($id,$folder['title'],[...liveItems(json_decode($folder['items'],true)??[]),...$raw]);
+    });
     return ['ok'=>true,'id'=>$id,'type'=>'folder','duplicate'=>false,'path'=>'/?v='.rawurlencode($id)];
 }
 function registerPost(string $id,string $title,string $type,string $value): array {

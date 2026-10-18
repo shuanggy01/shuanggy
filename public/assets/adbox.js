@@ -25,5 +25,6 @@
   run();
   addEventListener('resize', () => boxes.forEach(fit), { passive: true });
   if (window.ResizeObserver) boxes.forEach(b => new ResizeObserver(() => fit(b)).observe(b));
-  const timer = setInterval(() => { tick++; run(); if (tick >= 30) clearInterval(timer); }, 1000);
+  // Fast at first, then a slow poll so an ad that fills late still reopens its box.
+  const timer = setInterval(() => { tick++; run(); if (tick >= 30) { clearInterval(timer); setInterval(run, 4000); } }, 1000);
 })();

@@ -50,12 +50,15 @@ try {
         $items=$input['items']??[];if(!is_array($items))throw new RuntimeException('Isi folder tidak valid.');
         $folderId=(string)($input['id']??'');$title=(string)($input['title']??'');
         if($folderId==='')jsonOut(registerPost(bin2hex(random_bytes(6)),$title,'folder',implode(',',array_map('strval',$items))));
-        updateFolder($folderId,$title,$items);jsonOut(['ok'=>true,'id'=>$folderId]);
+        updateFolder($folderId,$title,liveItems($items),true);jsonOut(['ok'=>true,'id'=>$folderId]);
+    case 'items_reorder':
+        $order=$input['order']??[];if(!is_array($order))throw new RuntimeException('Urutan tidak valid.');
+        reorderFolder((string)($input['id']??''),$order);jsonOut(['ok'=>true]);
     case 'folder_delete':
         // Removes the folder only; its videos stay published.
         initPostTables();db()->prepare('DELETE FROM collections WHERE id=?')->execute([(string)($input['id']??'')]);jsonOut(['ok'=>true]);
     case 'video_edit':
-        $title=trim((string)($input['title']??''));if($title===''||strlen($title)>600)throw new RuntimeException('Judul tidak valid.');db()->prepare('UPDATE videos SET title=? WHERE id=?')->execute([$title,(string)($input['id']??'')]);jsonOut(['ok'=>true]);
+        $title=trim((string)($input['title']??''));if($title===''||strlen($title)>600)throw new RuntimeException('Judul tidak valid.');$q=db()->prepare('UPDATE videos SET title=? WHERE id=?');$q->execute([$title,(string)($input['id']??'')]);if(!$q->rowCount())throw new RuntimeException('Video tidak ditemukan (mungkin sudah dihapus). Muat ulang halaman.');jsonOut(['ok'=>true]);
     case 'thumb_upload':
         $v=findVideo((string)($input['id']??''));if(!$v)throw new RuntimeException('Video tidak ditemukan.');
         $f=$_FILES['thumb']??null;if(!is_array($f)||$f['error']!==UPLOAD_ERR_OK||!is_uploaded_file($f['tmp_name']))throw new RuntimeException('Upload gagal. Pilih gambar maksimal 5 MB.');
@@ -81,7 +84,7 @@ try {
         $vid=(string)($input['id']??'');db()->prepare('DELETE FROM videos WHERE id=?')->execute([$vid]);purgeFromFolders([$vid]);jsonOut(['ok'=>true]);
     case 'link_edit':
         initPostTables();$title=trim((string)($input['title']??''));if($title===''||strlen($title)>600)throw new RuntimeException('Judul tidak valid.');
-        db()->prepare('UPDATE external_links SET title=? WHERE id=?')->execute([$title,(string)($input['id']??'')]);jsonOut(['ok'=>true]);
+        $q=db()->prepare('UPDATE external_links SET title=? WHERE id=?');$q->execute([$title,(string)($input['id']??'')]);if(!$q->rowCount())throw new RuntimeException('Link tidak ditemukan (mungkin sudah dihapus). Muat ulang halaman.');jsonOut(['ok'=>true]);
     case 'link_delete':
         initPostTables();$lid=(string)($input['id']??'');db()->prepare('DELETE FROM external_links WHERE id=?')->execute([$lid]);purgeFromFolders([$lid]);jsonOut(['ok'=>true]);
     case 'items_move':

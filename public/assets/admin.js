@@ -37,14 +37,16 @@ $('#search').addEventListener('input',e=>{const q=e.target.value.trim().toLowerC
     f.hidden=!!q&&!nameHit&&!inner;if(!f.hidden)count++;if(q&&inner)f.open=true;});
   $('#no-results').hidden=count!==0||!q;});
 // Folder: same format as bot Telegram (tipe=folder, list of post IDs).
-const editor=$('#folder-editor');let picked=[],keep=[];
+// A deleted post can sit in several folders: remove every row for it and refresh each folder.
+function dropEverywhere(id){const boxes=new Set();$$('.video-row').filter(r=>r.dataset.id===id).forEach(r=>{const b=r.closest('.folder');if(b)boxes.add(b);r.remove();});boxes.forEach(refreshFolder);}
+const editor=$('#folder-editor');let picked=[],keep=[],orig=[];
 function openEditor(box){editor.hidden=false;editor.elements.id.value=box?box.dataset.id:'';editor.elements.title.value=box?$('.folder-name',box).textContent:'';
-  const items=box?JSON.parse(box.dataset.items):[];const ids=$$('.pick input').map(c=>c.value);picked=items.filter(i=>ids.includes(i));keep=items.filter(i=>!ids.includes(i));
+  const items=box?JSON.parse(box.dataset.items):[];const ids=$$('.pick input').map(c=>c.value);orig=items;picked=items.filter(i=>ids.includes(i));keep=items.filter(i=>!ids.includes(i));
   $$('.pick input').forEach(c=>c.checked=picked.includes(c.value));editor.scrollIntoView({behavior:'smooth',block:'start'});editor.elements.title.focus({preventScroll:true});}
 $$('.pick input').forEach(c=>c.addEventListener('change',()=>{picked=picked.filter(i=>i!==c.value);if(c.checked)picked.push(c.value);}));
 $('#new-folder').onclick=()=>openEditor(null);$('#cancel-folder').onclick=()=>{editor.hidden=true;};
 editor.addEventListener('submit',async e=>{e.preventDefault();const b=$('#save-folder');b.disabled=true;
-  try{await api('folder_save',{id:editor.elements.id.value,title:editor.elements.title.value,items:[...picked,...keep]});toast('Folder tersimpan.');location.hash='library';location.reload();}catch(err){toast(err.message,true);b.disabled=false;}});
+  try{await api('folder_save',{id:editor.elements.id.value,title:editor.elements.title.value,items:[...orig.filter(i=>keep.includes(i)||picked.includes(i)),...picked.filter(i=>!orig.includes(i))]});toast('Folder tersimpan.');location.hash='library';location.reload();}catch(err){toast(err.message,true);b.disabled=false;}});
 $$('.folder').forEach(box=>{
   $('.edit-folder',box).onclick=()=>openEditor(box);
   $('.delete-folder',box).onclick=async()=>{if(!confirm('Hapus folder ini? Video di dalamnya tetap ada.'))return;try{await api('folder_delete',{id:box.dataset.id});box.remove();toast('Folder dihapus.');}catch(err){toast(err.message,true);}};
@@ -55,7 +57,7 @@ function refreshFolder(box){if(!box)return;const ids=[...$$('.video-row',box).ma
   box.dataset.items=JSON.stringify(ids);const m=$('.folder-meta',box);if(m)m.textContent=ids.length+' isi · '+(box.dataset.date||'');}
 $$('.video-row').forEach(row=>{
   $('.edit-video',row).onclick=async()=>{const title=prompt(isLink(row)?'Judul link:':'Judul video:',$('h3',row).textContent);if(title===null)return;try{await api(isLink(row)?'link_edit':'video_edit',{id:row.dataset.id,title});$('h3',row).textContent=title;row.dataset.title=title.toLowerCase();toast('Judul diperbarui.');}catch(err){toast(err.message,true);}};
-  $('.delete-video',row).onclick=async()=>{if(!confirm(isLink(row)?'Hapus link ini dari website?':'Hapus video ini dari website? File asli tetap tersimpan di R2.'))return;try{await api(isLink(row)?'link_delete':'video_delete',{id:row.dataset.id});const box=row.closest('.folder');row.remove();refreshFolder(box);syncBulk();toast(isLink(row)?'Link dihapus dari website.':'Video dihapus dari website.');}catch(err){toast(err.message,true);}};
+  $('.delete-video',row).onclick=async()=>{if(!confirm(isLink(row)?'Hapus link ini dari website?':'Hapus video ini dari website? File asli tetap tersimpan di R2.'))return;try{await api(isLink(row)?'link_delete':'video_delete',{id:row.dataset.id});const lnk=isLink(row);dropEverywhere(row.dataset.id);syncBulk();toast(lnk?'Link dihapus dari website.':'Video dihapus dari website.');}catch(err){toast(err.message,true);}};
 });
 $('#url-form').addEventListener('submit',async e=>{
   e.preventDefault();if(working)return;working=true;const btn=$('#publish-url');btn.disabled=true;btn.textContent='Menerbitkan…';
@@ -81,7 +83,7 @@ $('#search').addEventListener('input',syncBulk);
 $('#bulk-title').onclick=()=>copy(selected().map(withTitle).join('\n\n'));
 $('#bulk-link').onclick=()=>copy(selected().map(itemUrl).join('\n'));
 $('#bulk-delete').onclick=async()=>{const items=selected();if(!items.length||!confirm('Hapus '+items.length+' item terpilih? Video di dalam folder yang dihapus tetap ada.'))return;let done=0;
-  for(const el of items){if(!el.isConnected)continue;try{await api(el.dataset.kind==='folder'?'folder_delete':isLink(el)?'link_delete':'video_delete',{id:el.dataset.id});const box=el.closest('.folder');el.remove();if(box&&box!==el)refreshFolder(box);done++;}catch(err){toast(err.message,true);break;}}
+  for(const el of items){if(!el.isConnected)continue;try{await api(el.dataset.kind==='folder'?'folder_delete':isLink(el)?'link_delete':'video_delete',{id:el.dataset.id});if(el.dataset.kind==='folder')el.remove();else dropEverywhere(el.dataset.id);done++;}catch(err){toast(err.message,true);break;}}
   syncBulk();if(done)toast(done+' item dihapus.');};
 // Thumbnail: upload an image (JPG/PNG/WebP) or paste an image link.
 const thumbInput=$('#thumb-file');let thumbRow=null;
@@ -123,7 +125,7 @@ $$('.move-item:not(.missing-out)').forEach(btn=>btn.onclick=()=>{const row=btn.c
   row.append(panel);});
 $$('.missing-out').forEach(btn=>btn.onclick=()=>moveItems([{id:btn.dataset.id,from:btn.closest('.folder').dataset.id}],''));
 // Reorder inside a folder (saved immediately).
-async function saveOrder(box){try{await api('folder_save',{id:box.dataset.id,title:$('.folder-name',box).textContent,items:JSON.parse(box.dataset.items)});}catch(err){toast(err.message,true);setTimeout(()=>location.reload(),1200);}}
+async function saveOrder(box){try{await api('items_reorder',{id:box.dataset.id,order:JSON.parse(box.dataset.items)});}catch(err){toast(err.message,true);setTimeout(()=>location.reload(),1200);}}
 function shiftRow(row,dir){const sib=dir<0?row.previousElementSibling:row.nextElementSibling;if(!sib||!sib.classList.contains('video-row'))return;
   if(dir<0)sib.before(row);else sib.after(row);const box=row.closest('.folder');refreshFolder(box);saveOrder(box);row.scrollIntoView({block:'nearest',behavior:'smooth'});}
 $$('.up-item').forEach(b=>b.onclick=()=>shiftRow(b.closest('.video-row'),-1));$$('.down-item').forEach(b=>b.onclick=()=>shiftRow(b.closest('.video-row'),1));

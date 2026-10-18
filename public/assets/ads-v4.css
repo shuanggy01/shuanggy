@@ -8,9 +8,18 @@
 .ad-fit{position:relative;margin:0 auto;width:calc(var(--w)*var(--s,1)*1px);height:calc(var(--h)*var(--s,1)*1px);max-width:100%;overflow:hidden}
 .ad-fit-inner{position:absolute;left:0;top:0;width:calc(var(--w)*1px);height:calc(var(--h)*1px);transform:scale(var(--s,1));transform-origin:0 0}
 .ad-native{max-width:100%;overflow:hidden;text-align:center}
-.ad-top{max-width:728px;margin:0 auto 16px}
-.ad-top-image{text-align:center}
+.top-ad{max-width:728px;margin:0 auto 16px}
+.top-ad-image{text-align:center}
 .ad-empty{height:0!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;opacity:0;pointer-events:none}
 .download-ad>iframe{display:block;width:100%;border:0;background:#111}
 /* .viewer-main / .download-main are grids: the banner must not push its track wider than the screen. */
-.ad-top{display:block!important;width:100%;min-width:0;box-sizing:border-box;contain:inline-size}
+.top-ad{display:block;width:100%;min-width:0;box-sizing:border-box;contain:inline-size}
+.top-ad.ad-empty{display:none}
+/* Watch page: the banner is its own auto row between header and player, so the player keeps its 1fr track. */
+body:not(.watch-page) .top-ad{padding:0 16px;margin-top:16px}
+@media(max-width:767px),(max-height:560px) and (pointer:coarse){
+ body.watch-page.has-top-ad{grid-template-rows:auto auto minmax(0,1fr)}
+ body.watch-page.has-top-ad .viewer-header{grid-row:1}
+ body.watch-page.has-top-ad .top-ad{grid-row:2;margin:6px auto 0;padding:0 10px}
+ body.watch-page.has-top-ad .viewer-main{grid-row:3}
+}
