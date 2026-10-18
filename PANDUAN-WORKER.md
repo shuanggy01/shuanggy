@@ -40,7 +40,11 @@ Klik **Deploy** / **Save**.
 Worker → **Settings** → **Domains & Routes** → **Add** → **Route**:
 
 - Zone: `viduk.fun`
-- Route: `viduk.fun/media/*`
+- Route: `viduk.fun/media/*` (pilih **Route**, bukan *Custom domain*)
+
+Kalau route itu ditolak, `*viduk.fun/*` juga boleh dipakai. Dengan route itu
+semua halaman viduk.fun lewat Worker dan diteruskan apa adanya ke server, tapi
+setiap halaman ikut dihitung sebagai request Worker.
 
 ## 4. Cek Worker sudah aktif
 

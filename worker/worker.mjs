@@ -69,7 +69,8 @@ async function origin(request,noCache){
   headers.set('X-Content-Type-Options','nosniff');
   if(!headers.has('Referrer-Policy'))headers.set('Referrer-Policy','strict-origin-when-cross-origin');
   if(!headers.has('X-Frame-Options'))headers.set('X-Frame-Options','SAMEORIGIN');
-  if(noCache)headers.set('Cache-Control','private, no-store');
+  // Keep an explicit public cache from PHP (e.g. the fast Shopee/link redirect); force no-store otherwise.
+  if(noCache&&!/(^|,)\s*public\b/i.test(headers.get('Cache-Control')||''))headers.set('Cache-Control','private, no-store');
   return new Response(response.body,{status:response.status,statusText:response.statusText,headers,encodeBody:'manual'});
 }
 export default {
