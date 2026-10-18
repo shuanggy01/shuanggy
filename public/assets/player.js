@@ -55,7 +55,7 @@ function showAd(ad,resume){
   let left=Math.max(0,Number(ad.seconds)||0);const tick=()=>{if(left)count.textContent=left;else done();};tick();
   if(left)timer=setInterval(()=>{if(!document.hidden)left=Math.max(0,left-1);tick();if(!left)clearInterval(timer);},1000);
 }
-$('#start-play').onclick=()=>{if(state!=='idle')return;advance();};
+$('#start-play').onclick=()=>{if(state!=='idle')return;const gate=window.vidukAgeGate;if(gate&&!gate.done){gate.open(advance);return;}advance();};
 function toggle(){if(state!=='main'&&state!=='ended')return;if(video.paused){if(state==='ended'){state='main';video.currentTime=0;}message('');safePlay(video,()=>message('Video belum bisa diputar. Coba lagi.'));}else video.pause();}
 $('#toggle-play').onclick=toggle;video.addEventListener('click',()=>{if(state==='idle')$('#start-play').click();else toggle();});
 video.addEventListener('play',()=>{if(!['main','ended'].includes(state)){video.pause();return;}state='main';$('#toggle-play').textContent='Ⅱ';$('#toggle-play').setAttribute('aria-label','Jeda');message('');});

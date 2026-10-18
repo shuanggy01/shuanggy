@@ -9,6 +9,7 @@ function adSlots(): array {
         'download_banner'=>['label'=>'Banner download','overlay'=>false,'hint'=>'Di halaman download.'],
         'popup'=>['label'=>'Popunder / Script halaman','overlay'=>false,'hint'=>'Kode/URL script di halaman tonton.'],
         'direct'=>['label'=>'Direct link','overlay'=>false,'hint'=>'Satu link per baris, bergantian.'],
+        'agegate'=>['label'=>'Popup 18+ smartlink','overlay'=>false,'times'=>true,'hint'=>'Smartlink https://, satu per baris (dipilih acak). Muncul saat ▶ ditekan dan di detik yang diisi.'],
     ];
 }
 function adDefaults(): array {
@@ -75,6 +76,14 @@ function adParse(string $content): array {
     elseif(preg_match('/\.js$/',$path))$out['kind']='script';
     else $out['kind']='link';
     return $out;
+}
+// Popup 18+ (age confirmation): "Ya" opens a random smartlink in a new tab and the video keeps playing.
+// X closes it and "Keluar" leaves the page, so no control is disguised.
+function adAgeGate(array $site): void {
+    $ad=adFind($site,'agegate');if(!$ad)return;
+    $links=array_values(array_filter(adParse($ad['content'])['links']??[],fn($u)=>str_starts_with($u,'https://')));if(!$links)return;
+    $json=json_encode(['links'=>$links,'times'=>adTimes((string)$ad['times'])],JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_SLASHES);
+    echo '<link rel="stylesheet" href="assets/agegate.css?v=1"><script type="application/json" id="agegate-data">'.$json.'</script><script src="assets/agegate.js?v=1" defer></script>';
 }
 function adFind(array $site,string $slot): ?array {
     foreach($site['ads'] as $ad)if($ad['slot']===$slot&&!empty($ad['enabled'])&&trim($ad['content'])!=='')return $ad;return null;
