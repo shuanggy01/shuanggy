@@ -38,8 +38,8 @@ $format=strtoupper(pathinfo((string)parse_url($v['video_url'],PHP_URL_PATH),PATH
 if(!in_array($format,['MP4','WEBM','M3U8'],true))$format='VIDEO';
 session_write_close();
 ?><!doctype html>
-<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#171717"><meta name="robots" content="noindex,follow"><title>Download · <?=h($v['title'])?></title><link rel="stylesheet" href="assets/style.css"><link rel="stylesheet" href="assets/mobile-v3.css?v=3"><link rel="stylesheet" href="assets/ads-v4.css?v=4"></head>
-<body class="download-body"><main class="download-main"><article class="download-card">
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#171717"><meta name="robots" content="noindex,follow"><title>Download · <?=h($v['title'])?></title><link rel="stylesheet" href="assets/style.css"><link rel="stylesheet" href="assets/mobile-v3.css?v=3"><link rel="stylesheet" href="assets/ads-v4.css?v=5"><?php adHeadMeta($site);adBlockCode($site,'head');?></head>
+<body class="download-body"><main class="download-main"><?php adTopBanner($site);?><article class="download-card">
 <p class="download-label">DOWNLOAD VIDEO</p>
 <h1 class="download-title"><?=h($v['title'])?></h1>
 <img class="download-cover" src="<?=h(thumbSource($v,$site))?>" alt="Thumbnail video" width="1280" height="720">
@@ -55,4 +55,4 @@ session_write_close();
 </section>
 <?php adDirect($site,$id);?>
 <a class="button download-back" href="<?=h(postPath($v,$site))?>">← Kembali ke halaman video</a>
-</article></main><script src="assets/download-v3.js?v=3" defer></script></body></html>
+</article></main><script src="assets/download-v3.js?v=3" defer></script><?php adPageEnd($site,false);?></body></html>

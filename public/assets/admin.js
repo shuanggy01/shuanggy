@@ -13,9 +13,9 @@ let toastTimer;
 function toast(message, error = false) {const t=$('#toast'); t.textContent=message; t.classList.toggle('error',error); t.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.hidden=true,7000);}
 async function copy(text) {try {await navigator.clipboard.writeText(text); toast('Berhasil disalin.');} catch {window.prompt('Salin teks berikut:',text);}}
 const videoLink = id => new URL('/?v='+encodeURIComponent(id),location.origin).href;
-function readAds() {return $$('.ad-config').map(box=>{const v=n=>$('[name="'+n+'"]',box);return {slot:box.dataset.slot,enabled:v('enabled').checked,content:v('content').value,seconds:v('seconds')?Number(v('seconds').value):0,times:v('times')?v('times').value:''};});}
+function readAds() {return $$('.ad-config').map(box=>{const v=n=>$('[name="'+n+'"]',box);const o=v('opt');return {slot:box.dataset.slot,enabled:v('enabled').checked,content:v('content').value,seconds:v('seconds')?Number(v('seconds').value):0,times:v('times')?v('times').value:'',opt:o?(o.type==='checkbox'?(o.checked?'1':'0'):o.value):''};});}
 function readGeneral() {const f=$('#general-form');return {site_name:f.elements.site_name.value,vip_url:f.elements.vip_url.value,download:f.elements.download.checked,pretty_links:f.elements.pretty_links.checked,media_proxy:f.elements.media_proxy.checked,media_ip_lock:f.elements.media_ip_lock.checked,video_proxy:f.elements.video_proxy.value.trim(),video_proxy_hosts:f.elements.video_proxy_hosts.value.trim()};}
-$$('.ad-config').forEach(box=>{const cb=$('[name="enabled"]',box),st=$('.acc-status',box);cb.addEventListener('change',()=>{st.textContent=cb.checked?'Aktif':'Nonaktif';st.classList.toggle('on',cb.checked);$('#ads-pill').textContent=$$('.ad-config [name="enabled"]:checked').length+' / '+$$('.ad-config').length+' aktif';});});
+$$('.ad-config').forEach(box=>{const cb=$('[name="enabled"]',box),st=$('.acc-status',box);cb.addEventListener('change',()=>{st.textContent=cb.checked?'Aktif':'Nonaktif';st.classList.toggle('on',cb.checked);$('#ads-pill').textContent=$$('.ad-config[data-ad] [name="enabled"]:checked').length+' / '+$$('.ad-config[data-ad]').length+' aktif';});});
 const openFold=id=>{const box=id&&document.getElementById(id);if(box&&box.classList.contains('fold'))box.open=true;};
 let opened=[];try{opened=JSON.parse(localStorage.getItem('studio-open')||'[]');}catch{}
 opened.forEach(openFold);openFold(location.hash.slice(1));
@@ -29,7 +29,13 @@ for (const id of ['ads-form','general-form']) $('#'+id).addEventListener('submit
 $('#r2-form').addEventListener('submit',async e=>{e.preventDefault();if(working)return toast('Tunggu posting selesai.',true);const b=$('.primary',e.target);b.disabled=true;try{await api('r2_save',Object.fromEntries(new FormData(e.target)));for(const k of ['access','secret']){e.target.elements[k].value='';e.target.elements[k].placeholder='Tersimpan · kosongkan agar tetap';}toast('Koneksi R2 disimpan.');}catch(err){toast(err.message,true);}finally{b.disabled=false;}});
 $('#test-r2').addEventListener('click',async e=>{e.target.disabled=true;try {toast((await api('r2_test')).message);}catch(err){toast(err.message,true);}finally{e.target.disabled=false;}});
 $('#password-form').addEventListener('submit',async e=>{e.preventDefault();try{await api('password',Object.fromEntries(new FormData(e.target)));e.target.reset();toast('Password diperbarui.');}catch(err){toast(err.message,true);}});
-$('#search').addEventListener('input',e=>{const q=e.target.value.toLowerCase();let count=0;$$('.video-row,.folder').forEach(row=>{row.hidden=!row.dataset.title.includes(q);if(!row.hidden)count++;});$('#no-results').hidden=count!==0||!q;});
+// Search covers loose videos, folder names and the videos inside folders (a match opens its folder).
+$('#search').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();let count=0;
+  $$('.video-list > .video-row').forEach(r=>{r.hidden=!!q&&!r.dataset.title.includes(q);if(!r.hidden)count++;});
+  $$('.folder').forEach(f=>{const nameHit=!q||f.dataset.title.includes(q);let inner=false;
+    $$('.video-row',f).forEach(r=>{const hit=!q||nameHit||r.dataset.title.includes(q);r.hidden=!hit;if(hit&&q&&!nameHit)inner=true;});
+    f.hidden=!!q&&!nameHit&&!inner;if(!f.hidden)count++;if(q&&inner)f.open=true;});
+  $('#no-results').hidden=count!==0||!q;});
 // Folder: same format as bot Telegram (tipe=folder, list of post IDs).
 const editor=$('#folder-editor');let picked=[],keep=[];
 function openEditor(box){editor.hidden=false;editor.elements.id.value=box?box.dataset.id:'';editor.elements.title.value=box?$('.folder-name',box).textContent:'';
@@ -43,9 +49,13 @@ $$('.folder').forEach(box=>{
   $('.edit-folder',box).onclick=()=>openEditor(box);
   $('.delete-folder',box).onclick=async()=>{if(!confirm('Hapus folder ini? Video di dalamnya tetap ada.'))return;try{await api('folder_delete',{id:box.dataset.id});box.remove();toast('Folder dihapus.');}catch(err){toast(err.message,true);}};
 });
+const isLink=row=>row.dataset.kind==='link';
+// Keep a folder's counter and data-items in sync after rows change without reloading.
+function refreshFolder(box){if(!box)return;const ids=[...$$('.video-row',box).map(r=>r.dataset.id),...$$('.folder-item[data-missing]',box).map(m=>m.dataset.missing)];
+  box.dataset.items=JSON.stringify(ids);const m=$('.folder-meta',box);if(m)m.textContent=ids.length+' isi · '+(box.dataset.date||'');}
 $$('.video-row').forEach(row=>{
-  $('.edit-video',row).onclick=async()=>{const title=prompt('Judul video:',$('h3',row).textContent);if(title===null)return;try{await api('video_edit',{id:row.dataset.id,title});$('h3',row).textContent=title;row.dataset.title=title.toLowerCase();toast('Judul diperbarui.');}catch(err){toast(err.message,true);}};
-  $('.delete-video',row).onclick=async()=>{if(!confirm('Hapus video ini dari website? File asli tetap tersimpan di R2.'))return;try{await api('video_delete',{id:row.dataset.id});row.remove();toast('Video dihapus dari website.');}catch(err){toast(err.message,true);}};
+  $('.edit-video',row).onclick=async()=>{const title=prompt(isLink(row)?'Judul link:':'Judul video:',$('h3',row).textContent);if(title===null)return;try{await api(isLink(row)?'link_edit':'video_edit',{id:row.dataset.id,title});$('h3',row).textContent=title;row.dataset.title=title.toLowerCase();toast('Judul diperbarui.');}catch(err){toast(err.message,true);}};
+  $('.delete-video',row).onclick=async()=>{if(!confirm(isLink(row)?'Hapus link ini dari website?':'Hapus video ini dari website? File asli tetap tersimpan di R2.'))return;try{await api(isLink(row)?'link_delete':'video_delete',{id:row.dataset.id});const box=row.closest('.folder');row.remove();refreshFolder(box);syncBulk();toast(isLink(row)?'Link dihapus dari website.':'Video dihapus dari website.');}catch(err){toast(err.message,true);}};
 });
 $('#url-form').addEventListener('submit',async e=>{
   e.preventDefault();if(working)return;working=true;const btn=$('#publish-url');btn.disabled=true;btn.textContent='Menerbitkan…';
@@ -56,23 +66,26 @@ $('#url-form').addEventListener('submit',async e=>{
 const itemUrl=el=>new URL(el.dataset.path,location.origin).href;
 const itemTitle=el=>el.dataset.kind==='folder'?$('.folder-name',el).textContent+' (ALBUM)':$('h3',el).textContent;
 const withTitle=el=>'▶️ '+itemTitle(el)+'\n'+itemUrl(el);
-$$('.video-row,.folder').forEach(el=>{$('.copy-title',el).onclick=()=>copy(withTitle(el));$('.copy-link',el).onclick=()=>copy(itemUrl(el));});
+const bindCopy=(el,scope)=>{$('.copy-title',scope).onclick=()=>copy(withTitle(el));$('.copy-link',scope).onclick=()=>copy(itemUrl(el));};
+$$('.video-row').forEach(r=>bindCopy(r,r));$$('.folder').forEach(f=>bindCopy(f,$('.folder-actions',f)));
 // Select videos/folders for bulk copy or delete.
 const selected=()=>$$('.sel:checked').map(c=>c.closest('.video-row,.folder')).filter(el=>el&&!el.hidden);
-function syncBulk(){const n=selected().length;$('#bulk-count').textContent=n+' dipilih';['#bulk-title','#bulk-link','#bulk-delete'].forEach(id=>$(id).disabled=!n);$('#bulk-bar').classList.toggle('on',n>0);
-  const visible=$$('.video-row,.folder').filter(el=>!el.hidden);$('#select-all').textContent=(visible.length&&visible.every(el=>$('.sel',el).checked)?'☑':'☐')+' Pilih semua';}
+const topLevel=()=>[...$$('.folder'),...$$('.video-list > .video-row')].filter(el=>!el.hidden);
+function syncBulk(){const sel=selected(),n=sel.length;$('#bulk-count').textContent=n+' dipilih';['#bulk-title','#bulk-link','#bulk-delete'].forEach(id=>$(id).disabled=!n);
+  $('#bulk-move').disabled=!sel.some(el=>el.dataset.kind!=='folder');$('#bulk-bar').classList.toggle('on',n>0);
+  const visible=topLevel();$('#select-all').textContent=(visible.length&&visible.every(el=>$('.sel',el).checked)?'☑':'☐')+' Pilih semua';}
 $$('.sel').forEach(c=>{c.addEventListener('click',e=>e.stopPropagation());c.addEventListener('change',e=>{c.closest('.video-row,.folder').classList.toggle('picked',c.checked);syncBulk();});});
 $$('.folder>summary').forEach(sm=>sm.addEventListener('click',e=>{if(e.target.classList.contains('sel'))e.preventDefault();}));
-$('#select-all').onclick=()=>{const visible=$$('.video-row,.folder').filter(el=>!el.hidden);const on=!visible.every(el=>$('.sel',el).checked);visible.forEach(el=>{$('.sel',el).checked=on;el.classList.toggle('picked',on);});syncBulk();};
+$('#select-all').onclick=()=>{const visible=topLevel();const on=!visible.every(el=>$('.sel',el).checked);visible.forEach(el=>{$('.sel',el).checked=on;el.classList.toggle('picked',on);});syncBulk();};
 $('#search').addEventListener('input',syncBulk);
 $('#bulk-title').onclick=()=>copy(selected().map(withTitle).join('\n\n'));
 $('#bulk-link').onclick=()=>copy(selected().map(itemUrl).join('\n'));
 $('#bulk-delete').onclick=async()=>{const items=selected();if(!items.length||!confirm('Hapus '+items.length+' item terpilih? Video di dalam folder yang dihapus tetap ada.'))return;let done=0;
-  for(const el of items){try{await api(el.dataset.kind==='folder'?'folder_delete':'video_delete',{id:el.dataset.id});el.remove();done++;}catch(err){toast(err.message,true);break;}}
+  for(const el of items){if(!el.isConnected)continue;try{await api(el.dataset.kind==='folder'?'folder_delete':isLink(el)?'link_delete':'video_delete',{id:el.dataset.id});const box=el.closest('.folder');el.remove();if(box&&box!==el)refreshFolder(box);done++;}catch(err){toast(err.message,true);break;}}
   syncBulk();if(done)toast(done+' item dihapus.');};
 // Thumbnail: upload an image (JPG/PNG/WebP) or paste an image link.
 const thumbInput=$('#thumb-file');let thumbRow=null;
-$$('.video-row').forEach(row=>{$('.edit-thumb',row).onclick=()=>{let panel=$('.thumb-panel',row);if(panel){panel.remove();return;}
+$$('.video-row[data-kind="video"]').forEach(row=>{$('.edit-thumb',row).onclick=()=>{let panel=$('.thumb-panel',row);if(panel){panel.remove();return;}
   panel=document.createElement('div');panel.className='thumb-panel';panel.innerHTML='<button type="button" class="secondary">📁 Upload gambar</button><button type="button" class="secondary">🔗 Pakai link</button><span class="hint">JPG, PNG, atau WebP · maks 5 MB</span>';
   const [up,link]=$$('button',panel);up.onclick=()=>{thumbRow=row;thumbInput.click();};link.onclick=()=>setThumbLink(row);row.append(panel);};});
 async function setThumbLink(row){const url=prompt('Link gambar thumbnail (https://…), kosongkan untuk gambar bawaan:',$('img',row).getAttribute('src').startsWith('http')?$('img',row).src:'');if(url===null)return;
@@ -91,3 +104,36 @@ $('#show-key').onclick=()=>{const show=keyInput.type==='password';keyInput.type=
 $('#copy-key').onclick=()=>keyInput.value?copy(keyInput.value):toast('Buat kunci dulu.',true);
 $('#gen-key').onclick=async()=>{if(keyInput.value&&!confirm('Buat kunci baru? Kunci lama langsung tidak berlaku, jadi MEDIA_KEY di Worker juga harus diganti.'))return;
   try{const r=await api('media_key');keyInput.value=r.key;keyInput.type='text';$('#show-key').textContent='Sembunyikan';toast('Kunci baru dibuat. Salin lalu simpan sebagai MEDIA_KEY di Worker.');}catch(err){toast(err.message,true);}};
+
+// ---- Move / reorder / select inside folders -------------------------------------------------
+const folderList=()=>$$('.folder').map(f=>({id:f.dataset.id,title:$('.folder-name',f).textContent}));
+// After a move the page reloads; remember which folder to open again.
+function reopenAfterReload(folderId,msg){try{sessionStorage.setItem('studio-reopen',JSON.stringify({folder:folderId||'',msg:msg||''}));}catch{}location.hash='library';location.reload();}
+async function moveItems(moves,to){try{const r=await api('items_move',{items:moves,to});reopenAfterReload(to||moves[0].from,r.moved+' item dipindahkan.');}catch(err){toast(err.message,true);}}
+function folderOptions(select,exclude,withOut){select.replaceChildren();
+  if(withOut)select.append(new Option('— Tanpa folder (keluarkan) —',''));
+  for(const f of folderList())if(f.id!==exclude)select.append(new Option('📁 '+f.title,f.id));}
+$$('.move-item:not(.missing-out)').forEach(btn=>btn.onclick=()=>{const row=btn.closest('.video-row');let panel=$('.move-panel',row);if(panel){panel.remove();return;}
+  const cur=row.dataset.folder||'';panel=document.createElement('div');panel.className='move-panel';
+  const sel=document.createElement('select');sel.setAttribute('aria-label','Pindah ke');folderOptions(sel,cur,!!cur);
+  const go=document.createElement('button');go.type='button';go.className='primary';go.textContent='Pindahkan';
+  const no=document.createElement('button');no.type='button';no.className='text-button';no.textContent='Batal';no.onclick=()=>panel.remove();
+  if(!sel.options.length){panel.append(Object.assign(document.createElement('span'),{className:'hint',textContent:'Belum ada folder lain. Buat folder dulu.'}),no);}
+  else{go.onclick=()=>moveItems([{id:row.dataset.id,from:cur}],sel.value);panel.append(sel,go,no);}
+  row.append(panel);});
+$$('.missing-out').forEach(btn=>btn.onclick=()=>moveItems([{id:btn.dataset.id,from:btn.closest('.folder').dataset.id}],''));
+// Reorder inside a folder (saved immediately).
+async function saveOrder(box){try{await api('folder_save',{id:box.dataset.id,title:$('.folder-name',box).textContent,items:JSON.parse(box.dataset.items)});}catch(err){toast(err.message,true);setTimeout(()=>location.reload(),1200);}}
+function shiftRow(row,dir){const sib=dir<0?row.previousElementSibling:row.nextElementSibling;if(!sib||!sib.classList.contains('video-row'))return;
+  if(dir<0)sib.before(row);else sib.after(row);const box=row.closest('.folder');refreshFolder(box);saveOrder(box);row.scrollIntoView({block:'nearest',behavior:'smooth'});}
+$$('.up-item').forEach(b=>b.onclick=()=>shiftRow(b.closest('.video-row'),-1));$$('.down-item').forEach(b=>b.onclick=()=>shiftRow(b.closest('.video-row'),1));
+$$('.pick-in-folder').forEach(b=>b.onclick=()=>{const rows=$$('.video-row',b.closest('.folder'));const on=!rows.every(r=>$('.sel',r).checked);rows.forEach(r=>{$('.sel',r).checked=on;r.classList.toggle('picked',on);});b.textContent=(on?'☑':'☐')+' Pilih semua isi';syncBulk();});
+// Bulk move.
+const bulkPanel=$('#bulk-move-panel'),bulkTo=$('#bulk-move-to');
+$('#bulk-move').onclick=()=>{folderOptions(bulkTo,'',true);if(!folderList().length)return toast('Belum ada folder. Buat folder dulu.',true);bulkPanel.hidden=!bulkPanel.hidden;};
+$('#bulk-move-cancel').onclick=()=>{bulkPanel.hidden=true;};
+$('#bulk-move-go').onclick=()=>{const items=selected().filter(el=>el.dataset.kind!=='folder');if(!items.length)return toast('Pilih video atau link dulu.',true);
+  moveItems(items.map(el=>({id:el.dataset.id,from:el.dataset.folder||''})),bulkTo.value);};
+// Reopen the folder that was being edited before the reload.
+try{const r=JSON.parse(sessionStorage.getItem('studio-reopen')||'null');sessionStorage.removeItem('studio-reopen');
+  if(r){openFold('library');const f=r.folder&&$$('.folder').find(x=>x.dataset.id===r.folder);if(f){f.open=true;setTimeout(()=>f.scrollIntoView({block:'start'}),50);}if(r.msg)toast(r.msg);}}catch{}

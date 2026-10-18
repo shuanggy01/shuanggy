@@ -94,3 +94,22 @@
 .row-actions>*{white-space:nowrap}
 @media(max-width:720px){.video-row .row-actions,.folder .row-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.video-row .row-actions>*,.folder .row-actions>*{padding:8px 4px;font-size:11px}}
 .media-key{margin:6px 0 16px}.media-key>label{margin-bottom:6px}.key-row{display:flex;gap:6px;flex-wrap:wrap}.key-row input{flex:1 1 220px;font-family:ui-monospace,Menlo,monospace;font-size:12px}.key-row button{min-height:42px;padding:8px 12px;font-size:12px}
+
+/* v14: folder rows with full actions, move panels, code & verification group */
+.video-row{flex-wrap:wrap}
+.video-row .row-actions{flex-wrap:wrap;justify-content:flex-end;max-width:470px}
+.video-row.in-folder{border-top:1px solid var(--line);padding:14px 0}
+.folder-tools{display:flex;justify-content:flex-end;margin:-6px 0 4px}
+.folder-tools .text-button{min-height:34px;padding:6px 8px;font-size:12px}
+.folder-item.missing{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 0;padding:10px 12px;border:1px dashed var(--line);border-radius:10px;font-size:12px;color:var(--muted)}
+.move-panel{display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%;padding:10px;border:1px dashed var(--line);border-radius:10px}
+.move-panel select{flex:1 1 200px;min-width:0}
+.move-panel button{min-height:40px;padding:8px 14px;font-size:12px}
+.bulk-move-panel{margin:6px 0 10px;background:var(--panel2)}
+.bulk-move-panel label{flex-basis:100%;margin:0;font-size:12px}
+.folder-empty-note{margin:6px 0 14px;font-size:12px}
+.cfg-head{margin-top:26px}
+.folder .folder-actions{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+@media(max-width:720px){.video-row.in-folder .row-actions{width:100%}.video-row .row-actions{max-width:none}}
+.video-row .row-actions .text-button{min-height:36px;padding:6px 8px;font-size:12px}
+@media(max-width:720px){.video-row .row-actions{gap:4px}}

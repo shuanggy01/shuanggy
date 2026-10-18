@@ -78,7 +78,15 @@ try {
         $url=validUrl((string)($input['url']??''));db()->prepare('UPDATE videos SET thumb_url=? WHERE id=?')->execute([$url,$v['id']]);jsonOut(['ok'=>true,'thumb_url'=>$url]);
     case 'video_delete':
         // Remove publication only. Objects are retained deliberately; no silent destructive deletion.
-        db()->prepare('DELETE FROM videos WHERE id=?')->execute([(string)($input['id']??'')]);jsonOut(['ok'=>true]);
+        $vid=(string)($input['id']??'');db()->prepare('DELETE FROM videos WHERE id=?')->execute([$vid]);purgeFromFolders([$vid]);jsonOut(['ok'=>true]);
+    case 'link_edit':
+        initPostTables();$title=trim((string)($input['title']??''));if($title===''||strlen($title)>600)throw new RuntimeException('Judul tidak valid.');
+        db()->prepare('UPDATE external_links SET title=? WHERE id=?')->execute([$title,(string)($input['id']??'')]);jsonOut(['ok'=>true]);
+    case 'link_delete':
+        initPostTables();$lid=(string)($input['id']??'');db()->prepare('DELETE FROM external_links WHERE id=?')->execute([$lid]);purgeFromFolders([$lid]);jsonOut(['ok'=>true]);
+    case 'items_move':
+        $moves=$input['items']??[];if(!is_array($moves))throw new RuntimeException('Data pindah tidak valid.');
+        jsonOut(['ok'=>true,'moved'=>moveFolderItems($moves,(string)($input['to']??''))]);
     case 'password':
         $q=db()->prepare('SELECT * FROM admins WHERE id=?');$q->execute([$_SESSION['admin']]);$admin=$q->fetch();
         if(!$admin||!password_verify((string)($input['current']??''),$admin['password']))throw new RuntimeException('Password lama tidak cocok.');$password=(string)($input['password']??'');if(strlen($password)<12||strlen($password)>200)throw new RuntimeException('Password baru harus 12–200 karakter.');

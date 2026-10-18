@@ -1,6 +1,16 @@
 .download-ad{margin:20px 0;text-align:center;max-width:100%;overflow:hidden}
-.download-ad iframe{display:block;width:100%;border:0;background:#111}
-.download-ad img{max-width:100%;height:auto;display:block;margin:auto}
+.download-ad>img,.download-ad>a>img{max-width:100%;height:auto;display:block;margin:auto}
 .download-ad .hint{margin:0 0 8px;font-size:10px;letter-spacing:1px}
 .download-card>.direct-sponsor{display:flex;margin:14px 0}
 .viewer-note .direct-sponsor{display:inline;padding:0;margin-left:8px;background:none;border:0;min-height:0;font-size:inherit;text-decoration:underline;color:#d7c9df}
+
+/* v5: inline banners. A fixed-size ad (.ad-fit) is scaled down by assets/adbox.js on small screens. */
+.ad-fit{position:relative;margin:0 auto;width:calc(var(--w)*var(--s,1)*1px);height:calc(var(--h)*var(--s,1)*1px);max-width:100%;overflow:hidden}
+.ad-fit-inner{position:absolute;left:0;top:0;width:calc(var(--w)*1px);height:calc(var(--h)*1px);transform:scale(var(--s,1));transform-origin:0 0}
+.ad-native{max-width:100%;overflow:hidden;text-align:center}
+.ad-top{max-width:728px;margin:0 auto 16px}
+.ad-top-image{text-align:center}
+.ad-empty{height:0!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;opacity:0;pointer-events:none}
+.download-ad>iframe{display:block;width:100%;border:0;background:#111}
+/* .viewer-main / .download-main are grids: the banner must not push its track wider than the screen. */
+.ad-top{display:block!important;width:100%;min-width:0;box-sizing:border-box;contain:inline-size}
