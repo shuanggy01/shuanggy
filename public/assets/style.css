@@ -42,3 +42,16 @@
 .acc-footer{border-top:1px solid var(--line);padding-top:18px}
 .save-all{min-height:56px;font-size:16px}
 @media(max-width:720px){.studio .acc>summary{min-height:58px;padding:12px 14px;gap:10px}.acc-body{padding:12px 14px 14px}.acc-title small{display:none}.save-all{min-height:52px;font-size:15px}}
+
+/* v9: kartu bagian bisa dibuka-tutup */
+.studio>details.fold{margin:0 0 16px;padding:0!important;border:1px solid var(--line);overflow:hidden}
+.studio>details.fold[open]{border-color:#ff249d40}
+.studio .fold>summary.section-head{list-style:none;cursor:pointer;margin:0;padding:22px 28px;gap:14px;font-size:inherit;color:var(--text)}
+.fold>summary::-webkit-details-marker{display:none}
+.fold>summary:hover{background:#ffffff05}
+.fold>summary>div{flex:1;min-width:0}
+.fold>summary h2{margin:0}
+.fold[open]>summary>.acc-arrow{transform:rotate(90deg);color:var(--accent)}
+.fold-body{border-top:1px solid var(--line);padding:22px 28px 28px}
+.fold-body>input[type=search]{margin-bottom:16px}
+@media(max-width:720px){.studio>details.fold{margin-bottom:12px}.studio .fold>summary.section-head{flex-wrap:nowrap;padding:16px 14px;gap:10px}.fold>summary h2{font-size:18px}.fold-body{padding:14px 14px 16px}}
