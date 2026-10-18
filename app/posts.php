@@ -23,6 +23,12 @@ function updateFolder(string $id,string $title,array $raw): void {
     $folder=extraPost($id);if(!$folder||$folder['kind']!=='folder')throw new RuntimeException('Folder tidak ditemukan.');
     db()->prepare('UPDATE collections SET title=?,items=? WHERE id=?')->execute([$title,json_encode(folderItems($id,$raw)),$id]);
 }
+// Append posts to an existing folder (admin "Masukkan ke folder" and bot /tambah). Re-sending the same IDs is harmless.
+function appendFolder(string $id,array $raw): array {
+    $folder=extraPost($id);if(!$folder||$folder['kind']!=='folder')throw new RuntimeException('Folder tidak ditemukan: '.$id);
+    updateFolder($id,$folder['title'],[...(json_decode($folder['items'],true)??[]),...$raw]);
+    return ['ok'=>true,'id'=>$id,'type'=>'folder','duplicate'=>false,'path'=>'/?v='.rawurlencode($id)];
+}
 function registerPost(string $id,string $title,string $type,string $value): array {
     initPostTables();$title=trim($title);
     if(!preg_match('/^[a-zA-Z0-9_-]{4,40}$/',$id))throw new RuntimeException('ID posting tidak valid.');

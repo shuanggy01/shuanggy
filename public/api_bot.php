@@ -7,5 +7,8 @@ if(strlen($expected)<32||!hash_equals($expected,$given))fail('Kunci API bot tida
 // This endpoint uses its own key, not browser login or CSRF. No arbitrary server-side URL fetching.
 session_write_close();
 try {
-    $out=registerPost((string)($_POST['id_video']??''),(string)($_POST['judul']??''),(string)($_POST['tipe']??'video'),(string)($_POST['link_asli']??''));jsonOut($out);
+    $type=(string)($_POST['tipe']??'video');
+    // folder_add: id_video = existing folder ID, link_asli = comma-separated post IDs to append.
+    if($type==='folder_add')jsonOut(appendFolder((string)($_POST['id_video']??''),explode(',',(string)($_POST['link_asli']??''))));
+    $out=registerPost((string)($_POST['id_video']??''),(string)($_POST['judul']??''),$type,(string)($_POST['link_asli']??''));jsonOut($out);
 }catch(Throwable $e){fail($e instanceof RuntimeException&&!($e instanceof PDOException)?$e->getMessage():'Gagal menyimpan posting. Periksa database/izin folder var.',400);}

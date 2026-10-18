@@ -33,7 +33,7 @@ try {
         if(str_contains($video,'||')||str_contains($thumb,'||'))throw new RuntimeException('URL tidak valid.');
         $out=registerPost($id,$title,'video',$video.'||'.$thumb);
         $folderId=(string)($input['folder']??'');
-        if($folderId!==''){$folder=extraPost($folderId);if(!$folder||$folder['kind']!=='folder')throw new RuntimeException('Video terbit, tetapi folder tidak ditemukan.');updateFolder($folderId,$folder['title'],[...json_decode($folder['items'],true),$id]);}
+        if($folderId!==''){try{appendFolder($folderId,[$id]);}catch(RuntimeException $e){throw new RuntimeException('Video terbit, tetapi gagal masuk folder: '.$e->getMessage());}}
         jsonOut($out);
     case 'folder_save':
         $items=$input['items']??[];if(!is_array($items))throw new RuntimeException('Isi folder tidak valid.');
