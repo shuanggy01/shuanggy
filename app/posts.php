@@ -17,6 +17,8 @@ function folderItems(string $id,array $raw): array {
     return $items;
 }
 function listFolders(): array {initPostTables();return db()->query('SELECT * FROM collections ORDER BY created_at DESC')->fetchAll();}
+// IDs that already live in a folder: hidden from the loose video lists.
+function folderedIds(): array {$ids=[];foreach(listFolders() as $f)foreach(json_decode($f['items'],true)??[] as $i)$ids[(string)$i]=$f['title'];return $ids;}
 function updateFolder(string $id,string $title,array $raw): void {
     initPostTables();$title=trim($title);
     if($title===''||strlen($title)>600)throw new RuntimeException('Judul folder harus diisi, maksimal 600 byte.');

@@ -75,3 +75,4 @@
 @media(max-width:720px){.folder-editor{padding:14px}.folder .row-actions{width:100%}}
 .fold-body>input[type=search]+.lib-head{margin-top:4px}
 .folder .acc-title small{display:block!important}
+.pick .in-folder{display:block;font-size:11px;color:var(--muted);font-weight:400}
