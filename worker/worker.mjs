@@ -16,6 +16,28 @@ function decodeToken(token){
   if(target.protocol!=='https:'||target.username||target.password||target.port||target.hash||!MEDIA_EXT.test(target.pathname))throw Error('url');
   return target;
 }
+// MEDIA_KEY set: tokens are AES-256-GCM sealed by PHP ({u:url,e:expiry,i:ip prefix}).
+function ipPrefix(ip){
+  ip=String(ip||'');
+  if(/^\d{1,3}(\.\d{1,3}){3}$/.test(ip))return ip.split('.').slice(0,3).map(n=>(+n).toString(16).padStart(2,'0')).join('');
+  if(!ip.includes(':'))return '';
+  const [h,t]=ip.split('::'),head=h?h.split(':'):[],tail=t?t.split(':'):[];
+  const parts=ip.includes('::')?[...head,...Array(Math.max(0,8-head.length-tail.length)).fill('0'),...tail]:head;
+  return parts.length===8?parts.slice(0,4).map(p=>p.toLowerCase().padStart(4,'0')).join(''):'';
+}
+let sealKey=null,sealSecret=null;
+async function openSealed(token,env,request){
+  if(!tokenPattern.test(token)||token.length>6000)throw Error('token');
+  const bytes=Uint8Array.from(atob(token.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
+  if(bytes.length<29)throw Error('token');
+  if(sealSecret!==env.MEDIA_KEY){sealKey=await crypto.subtle.importKey('raw',await crypto.subtle.digest('SHA-256',new TextEncoder().encode(env.MEDIA_KEY)),'AES-GCM',false,['decrypt']);sealSecret=env.MEDIA_KEY;}
+  let data;try{data=JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:bytes.slice(0,12)},sealKey,bytes.slice(12))));}catch{throw Error('token');}
+  if(data.e&&data.e<Date.now()/1000)throw Error('expired');
+  if(data.i&&data.i!==ipPrefix(request.headers.get('CF-Connecting-IP')))throw Error('ip');
+  const target=new URL(String(data.u));
+  if(target.protocol!=='https:'||target.username||target.password||target.port||target.hash||!MEDIA_EXT.test(target.pathname))throw Error('url');
+  return target;
+}
 function allowedTarget(target,allowed,players){
   return target.protocol==='https:'&&!target.username&&!target.password&&!target.port&&!target.hash&&
     allowed.has(target.hostname)&&!players.has(target.hostname)&&MEDIA_EXT.test(target.pathname);
@@ -25,7 +47,16 @@ async function media(request,url,env,players){
   if(!['GET','HEAD'].includes(request.method))return new Response('Gunakan GET atau HEAD.',{status:405,headers:{Allow:'GET, HEAD','Cache-Control':'no-store'}});
   const allowed=hosts(env.ALLOWED_MEDIA_HOSTS);
   if(!allowed.size)return error('Isi ALLOWED_MEDIA_HOSTS pada Worker terlebih dahulu.',503);
-  let target;try{target=decodeToken(url.pathname.slice('/media/'.length));}catch{return error('Token video tidak valid.');}
+  // Embedding /media/ on other websites is refused; requests without a Referer (apps, download managers on the viewer's device) still work.
+  const referer=request.headers.get('Referer');
+  if(referer){let host='';try{host=new URL(referer).hostname;}catch{}if(!players.has(host))return error('Video hanya bisa diputar di website asli.',403);}
+  let target;const token=url.pathname.slice('/media/'.length);
+  try{target=env.MEDIA_KEY?await openSealed(token,env,request):decodeToken(token);}
+  catch(e){
+    if(e.message==='expired')return error('Link video sudah kedaluwarsa. Muat ulang halaman video.',403);
+    if(e.message==='ip')return error('Link video hanya berlaku untuk penonton yang membuka halaman.',403);
+    return error('Token video tidak valid.');
+  }
   if(!allowedTarget(target,allowed,players))return error('Domain sumber video belum diizinkan.',403);
   const range=request.headers.get('Range');
   if(range&&(range.length>80||!/^bytes=(?:\d+-\d*|-\d+)$/.test(range)))return error('Range tidak didukung.',416);

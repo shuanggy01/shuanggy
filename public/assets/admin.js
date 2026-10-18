@@ -14,7 +14,7 @@ function toast(message, error = false) {const t=$('#toast'); t.textContent=messa
 async function copy(text) {try {await navigator.clipboard.writeText(text); toast('Berhasil disalin.');} catch {window.prompt('Salin teks berikut:',text);}}
 const videoLink = id => new URL('/?v='+encodeURIComponent(id),location.origin).href;
 function readAds() {return $$('.ad-config').map(box=>{const v=n=>$('[name="'+n+'"]',box);return {slot:box.dataset.slot,enabled:v('enabled').checked,content:v('content').value,seconds:v('seconds')?Number(v('seconds').value):0,times:v('times')?v('times').value:''};});}
-function readGeneral() {const f=$('#general-form');return {site_name:f.elements.site_name.value,vip_url:f.elements.vip_url.value,download:f.elements.download.checked,pretty_links:f.elements.pretty_links.checked,media_proxy:f.elements.media_proxy.checked};}
+function readGeneral() {const f=$('#general-form');return {site_name:f.elements.site_name.value,vip_url:f.elements.vip_url.value,download:f.elements.download.checked,pretty_links:f.elements.pretty_links.checked,media_proxy:f.elements.media_proxy.checked,media_ip_lock:f.elements.media_ip_lock.checked};}
 $$('.ad-config').forEach(box=>{const cb=$('[name="enabled"]',box),st=$('.acc-status',box);cb.addEventListener('change',()=>{st.textContent=cb.checked?'Aktif':'Nonaktif';st.classList.toggle('on',cb.checked);$('#ads-pill').textContent=$$('.ad-config [name="enabled"]:checked').length+' / '+$$('.ad-config').length+' aktif';});});
 const openFold=id=>{const box=id&&document.getElementById(id);if(box&&box.classList.contains('fold'))box.open=true;};
 let opened=[];try{opened=JSON.parse(localStorage.getItem('studio-open')||'[]');}catch{}
@@ -84,3 +84,10 @@ thumbInput.addEventListener('change',async()=>{const file=thumbInput.files[0],ro
   try{const res=await fetch('api.php',{method:'POST',credentials:'same-origin',headers:{'X-CSRF-Token':csrf},body});let json;try{json=await res.json();}catch{throw new Error('Respons server tidak valid.');}
     if(!res.ok||json.error)throw new Error(json.error||'Upload gagal.');$('img',row).src=json.thumb_url;$('.thumb-panel',row)?.remove();toast('Thumbnail diperbarui.');}
   catch(err){toast(err.message,true);}finally{btn.disabled=false;btn.textContent='Thumbnail';}});
+
+// MEDIA_KEY: shared with the Worker to encrypt /media/ links.
+const keyInput=$('#media-key');
+$('#show-key').onclick=()=>{const show=keyInput.type==='password';keyInput.type=show?'text':'password';$('#show-key').textContent=show?'Sembunyikan':'Lihat';};
+$('#copy-key').onclick=()=>keyInput.value?copy(keyInput.value):toast('Buat kunci dulu.',true);
+$('#gen-key').onclick=async()=>{if(keyInput.value&&!confirm('Buat kunci baru? Kunci lama langsung tidak berlaku, jadi MEDIA_KEY di Worker juga harus diganti.'))return;
+  try{const r=await api('media_key');keyInput.value=r.key;keyInput.type='text';$('#show-key').textContent='Sembunyikan';toast('Kunci baru dibuat. Salin lalu simpan sebagai MEDIA_KEY di Worker.');}catch(err){toast(err.message,true);}};

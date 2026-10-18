@@ -17,9 +17,12 @@ try {
     switch($action) {
     case 'settings':
         $site=settings();$site['site_name']=substr(trim((string)($input['site_name']??'Layar')),0,80)?:'Layar';$site['vip_url']=validUrl((string)($input['vip_url']??''));$site['download']=!empty($input['download']);
-        foreach(['pretty_links','media_proxy'] as $flag)if(array_key_exists($flag,$input))$site[$flag]=!empty($input[$flag]);
+        foreach(['pretty_links','media_proxy','media_ip_lock'] as $flag)if(array_key_exists($flag,$input))$site[$flag]=!empty($input[$flag]);
         $ads=validateAds($input['ads']??[],$site['ads']);
         $site['ads']=$ads;putSetting('site',$site);jsonOut(['ok'=>true]);
+    case 'media_key':
+        // New random MEDIA_KEY; the same value must be saved in the Worker variables.
+        $key=bin2hex(random_bytes(32));putSetting('media_key',encryptSecret($key));jsonOut(['ok'=>true,'key'=>$key]);
     case 'r2_save':
         $r=setting('r2',[]);
         $r['account']=trim((string)($input['account']??''));$r['bucket']=trim((string)($input['bucket']??''));$r['public']=rtrim(validUrl((string)($input['public']??''),false),'/');

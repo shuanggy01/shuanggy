@@ -73,3 +73,22 @@ Buka salah satu video dan pastikan bisa diputar.
 - Setiap pemutaran video membuat beberapa request ke Worker. Paket gratis
   Cloudflare dibatasi 100.000 request/hari per akun. Cek paket abang di
   **Workers & Pages → Plans**.
+
+## 6. Kunci link video (anti remote upload)
+
+Base64 biasa masih bisa dibaca dan dipakai siapa saja. Dengan `MEDIA_KEY`,
+link `/media/` dienkripsi, berlaku 6 jam, dan hanya bisa dipakai penonton
+yang membuka halaman (IP sama). Server remote upload akan ditolak.
+
+1. Admin → Pengaturan website → **matikan dulu** centang "Putar video & thumbnail lewat Worker" → Simpan.
+2. Klik **Buat kunci** di bagian MEDIA_KEY → **Salin**.
+3. Cloudflare → Worker **viduk-media** → Settings → Variables and Secrets → **Add**:
+   nama `MEDIA_KEY`, isi kunci yang tadi disalin (boleh dicentang *Secret*) → Deploy.
+4. Pastikan kode Worker sudah versi terbaru.
+5. Kembali ke admin → centang lagi "Putar video & thumbnail lewat Worker" →
+   pastikan "Kunci link video ke IP penonton" tercentang → Simpan.
+6. Buka satu video, pastikan bisa diputar.
+
+Kalau ganti kunci di admin, `MEDIA_KEY` di Worker juga harus diganti.
+Kalau ada penonton yang mengeluh video gagal karena jaringannya sering
+berganti, hilangkan centang "Kunci link video ke IP penonton".
