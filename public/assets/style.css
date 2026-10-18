@@ -23,3 +23,22 @@
 .ad-layer.ad-on .ad-frame.on{visibility:visible;pointer-events:auto}
 .ad-tap{position:absolute;inset:0;z-index:7;cursor:pointer;background:transparent}
 .ad-layer .ad-count{z-index:8}
+
+/* v8: accordion slot iklan */
+.acc-list{display:grid;gap:12px;margin-bottom:18px}
+.studio details.acc,.ad-config.acc{border:1px solid var(--line);border-radius:14px;background:var(--panel2);margin:0;padding:0!important;overflow:hidden;transition:border-color .18s}
+.studio details.acc[open]{border-color:#ff249d55}
+.studio .acc>summary{list-style:none;display:flex;align-items:center;gap:12px;min-height:66px;padding:14px 20px;margin:0;cursor:pointer;color:var(--text);font-size:14px}
+.acc>summary::-webkit-details-marker{display:none}
+.acc>summary:hover{background:#ffffff06}
+.acc-title{flex:1;min-width:0;display:grid;gap:2px;font-weight:650;overflow-wrap:anywhere}
+.acc-title small{font-size:11px;font-weight:400;color:var(--muted)}
+.acc-status{font-size:10px;font-weight:700;letter-spacing:.4px;padding:4px 10px;border-radius:20px;background:#242132;color:var(--muted);white-space:nowrap}
+.acc-status.on{background:#173a2c;color:#6ad8ae}
+.acc-arrow{font-size:12px;color:var(--muted);transition:transform .2s}
+.acc[open] .acc-arrow{transform:rotate(90deg);color:var(--accent)}
+.acc-body{border-top:1px solid var(--line);padding:16px 20px 20px}
+.acc-body .toggle{margin-bottom:12px;font-size:13px;color:var(--text)}
+.acc-footer{border-top:1px solid var(--line);padding-top:18px}
+.save-all{min-height:56px;font-size:16px}
+@media(max-width:720px){.studio .acc>summary{min-height:58px;padding:12px 14px;gap:10px}.acc-body{padding:12px 14px 14px}.acc-title small{display:none}.save-all{min-height:52px;font-size:15px}}

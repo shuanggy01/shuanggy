@@ -15,6 +15,7 @@ async function copy(text) {try {await navigator.clipboard.writeText(text); toast
 const videoLink = id => new URL('index.php?v='+encodeURIComponent(id),location.href).href;
 function readAds() {return $$('.ad-config').map(box=>{const v=n=>$('[name="'+n+'"]',box);return {slot:box.dataset.slot,enabled:v('enabled').checked,content:v('content').value,seconds:v('seconds')?Number(v('seconds').value):0,times:v('times')?v('times').value:''};});}
 function readGeneral() {const f=$('#general-form');return {site_name:f.elements.site_name.value,vip_url:f.elements.vip_url.value,download:f.elements.download.checked,pretty_links:f.elements.pretty_links.checked,media_proxy:false};}
+$$('.acc').forEach(box=>{const cb=$('[name="enabled"]',box),st=$('.acc-status',box);cb.addEventListener('change',()=>{st.textContent=cb.checked?'Aktif':'Nonaktif';st.classList.toggle('on',cb.checked);});});
 for (const id of ['ads-form','general-form']) $('#'+id).addEventListener('submit', async e=>{
   e.preventDefault();const b=$('button[type="submit"],button.primary',e.target);b.disabled=true;
   try {const next={...readGeneral(),ads:readAds()};await api('settings',next);Object.assign(site,next);toast('Pengaturan tersimpan.');}catch(err){toast(err.message,true);}finally{b.disabled=false;}
