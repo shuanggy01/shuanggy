@@ -1,0 +1,5 @@
+# Rahasia server — jangan di-commit
+/config.php
+/app/bot-access.php
+# Data runtime (SQLite, sesi)
+/var/

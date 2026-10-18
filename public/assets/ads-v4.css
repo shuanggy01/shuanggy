@@ -1,0 +1,6 @@
+.download-ad{margin:20px 0;text-align:center;max-width:100%;overflow:hidden}
+.download-ad iframe{display:block;width:100%;border:0;background:#111}
+.download-ad img{max-width:100%;height:auto;display:block;margin:auto}
+.download-ad .hint{margin:0 0 8px;font-size:10px;letter-spacing:1px}
+.download-card>.direct-sponsor{display:flex;margin:14px 0}
+.viewer-note .direct-sponsor{display:inline;padding:0;margin-left:8px;background:none;border:0;min-height:0;font-size:inherit;text-decoration:underline;color:#d7c9df}

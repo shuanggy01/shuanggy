@@ -1,0 +1,5 @@
+.viewer-header.promo-header{justify-content:center;text-align:center;padding:10px 12px 9px}
+.promo-header .promo-brand{display:flex;flex-direction:column;align-items:center;gap:1px;max-width:100%;line-height:1.05;color:#fff;text-decoration:none}
+.promo-brand strong{font-size:clamp(23px,5vw,34px);font-weight:900;letter-spacing:-.7px;text-shadow:0 0 3px #fff,0 0 7px #ff249d,0 0 15px #ff249d,0 0 23px #e00075}
+.promo-brand small{font-size:clamp(14px,3.5vw,19px);font-weight:800;text-shadow:0 0 3px #ff249d,0 0 6px #ff249d,0 0 12px #ff249d}
+@media(max-width:767px){.watch-page .viewer-header.promo-header{padding-top:calc(8px + env(safe-area-inset-top,0px));padding-bottom:8px}}
