@@ -72,6 +72,7 @@ final class PLTP_Publisher
             'default_category' => '',
             'description_template' => '',
             'smart_content_enabled' => 1,
+            'inline_media' => 1,
 
             'rank_math_enabled' => 1,
             'seo_title_template' => '{title} | {site_name}',
@@ -239,6 +240,7 @@ final class PLTP_Publisher
                 ? wp_kses_post((string) $input['description_template'])
                 : '',
             'smart_content_enabled' => !empty($input['smart_content_enabled']) ? 1 : 0,
+            'inline_media' => !empty($input['inline_media']) ? 1 : 0,
 
             'rank_math_enabled' => !empty($input['rank_math_enabled']) ? 1 : 0,
             'seo_title_template' => isset($input['seo_title_template'])
@@ -305,7 +307,7 @@ final class PLTP_Publisher
         $rotation_r2_ready = self::rotation_r2_config_ready();
         ?>
         <div class="wrap">
-            <h1>PejuangLendir Telegram Publisher V1.9.2</h1>
+            <h1>PejuangLendir Telegram Publisher V1.9.3</h1>
 
             <p><strong>Format Telegram — aktor & thumbnail opsional:</strong></p>
             <pre style="background:#fff;border:1px solid #ccd0d4;padding:12px;max-width:760px;">video_viral_hari_ini
@@ -612,6 +614,28 @@ https://cdn.example.com/thumb-2.jpg</pre>
                                     — <?php echo esc_html(self::rotation_r2_public_base_for_display()); ?>
                                 <?php else: ?>
                                     <strong style="color:#b32d2e;">BELUM LENGKAP</strong>
+                                <?php endif; ?>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th scope="row">Proses Langsung</th>
+                        <td>
+                            <label>
+                                <input type="checkbox"
+                                       name="<?php echo esc_attr(self::OPT); ?>[inline_media]"
+                                       value="1"
+                                       <?php checked(!empty($settings['inline_media'])); ?>>
+                                Buat thumbnail + 5 frame rotasi langsung setelah posting (tanpa worker/cron)
+                            </label>
+                            <p class="description">
+                                Berjalan di PHP setelah balasan Telegram dikirim. Butuh <code>proc_open</code> aktif
+                                dan FFmpeg/FFprobe terpasang.
+                                Status: <?php if (class_exists('PLTP_Inline_Media') && PLTP_Inline_Media::can_run()): ?>
+                                    <strong style="color:#16833b;">SIAP</strong>
+                                <?php else: ?>
+                                    <strong style="color:#b32d2e;">TIDAK TERSEDIA</strong> — worker/cron lama dipakai sebagai cadangan.
                                 <?php endif; ?>
                             </p>
                         </td>

@@ -81,7 +81,20 @@ final class PLTP_Auto_Media
         }
         // Recurring WP-Cron is the fallback if process functions are disabled.
         self::ensure_schedule();
+        // V1.9.3: build thumbnail + rotation right away in this PHP process,
+        // after the response is flushed. No cron/worker needed when proc_open
+        // and FFmpeg are available.
+        if (class_exists('PLTP_Inline_Media') && PLTP_Inline_Media::enabled()) {
+            PLTP_Inline_Media::schedule($post_id);
+            return;
+        }
         // Spawn immediately: the Telegram webhook never waits for FFmpeg.
+        self::launch_if_queued();
+    }
+
+    /** After inline processing: hand leftovers (failures/retries) to the OS workers. */
+    public static function post_ready_fallback(): void
+    {
         self::launch_if_queued();
     }
 

@@ -1,4 +1,4 @@
-PejuangLendir Telegram Publisher V1.9.2
+PejuangLendir Telegram Publisher V1.9.3
 
 AUTO THUMBNAIL ROTATION
 -----------------------
@@ -222,3 +222,12 @@ V1.9.2 Rotation Always-On + Reliability
   dan bisa diantrikan ulang dengan tombol "Ulangi yang Gagal". Tanda dihapus otomatis saat berhasil.
 - Pemicu worker setelah posting tidak lagi dibatalkan bila WP-Cron belum terjadwal.
 - Setelah upgrade: klik "Repair Thumbnail Lama" sekali untuk mengantrekan rotasi post lama.
+
+
+V1.9.3 Proses Langsung (tanpa worker)
+- Setelah link.mp4 + judul masuk ke bot, thumbnail utama dan 5 frame rotasi langsung dibuat di PHP
+  (includes/class-pltp-inline-media.php) setelah balasan Telegram dikirim, lalu diupload ke R2/WordPress.
+- Tidak butuh cron atau bin/*.sh selama proc_open aktif di PHP dan ffmpeg/ffprobe ada
+  (path dicari otomatis; bisa ditentukan lewat define('PLTP_FFMPEG','/path') di wp-config.php).
+- Jika gagal/tidak tersedia, post tetap di antrean dan worker lama jadi cadangan. Bisa dimatikan di Settings > Proses Langsung.
+- Pastikan proc_open tidak ada di disable_functions php.ini.
