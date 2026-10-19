@@ -1,0 +1,188 @@
+/* PejuangLendir Telegram Publisher V1.9.1 - mobile admin polish */
+
+.settings_page_pejuanglendir-telegram-publisher .wrap pre {
+    box-sizing: border-box;
+    max-width: 760px;
+    overflow-x: auto;
+}
+
+.settings_page_pejuanglendir-telegram-publisher .wrap code {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.settings_page_pejuanglendir-telegram-publisher .pltp-section-toggle-row {
+    display: none;
+}
+
+@media screen and (max-width: 782px) {
+    .settings_page_pejuanglendir-telegram-publisher #wpbody-content {
+        padding-bottom: 82px;
+    }
+
+    .settings_page_pejuanglendir-telegram-publisher .wrap {
+        margin: 10px 10px 0 2px;
+    }
+
+    .settings_page_pejuanglendir-telegram-publisher .wrap h1 {
+        margin: 4px 0 12px;
+        font-size: 21px;
+        line-height: 1.25;
+    }
+
+    .settings_page_pejuanglendir-telegram-publisher .wrap > p,
+    .settings_page_pejuanglendir-telegram-publisher .wrap .description {
+        line-height: 1.5;
+    }
+
+    .settings_page_pejuanglendir-telegram-publisher .wrap pre {
+        width: 100%;
+        max-width: none;
+        margin: 8px 0;
+        padding: 10px !important;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    .settings_page_pejuanglendir-telegram-publisher .pltp-settings-table,
+    .settings_page_pejuanglendir-telegram-publisher .pltp-settings-table tbody,
+    .settings_page_pejuanglendir-telegram-publisher .pltp-settings-table tr,
+    .settings_page_pejuanglendir-telegram-publisher .pltp-settings-table th,
+    .settings_page_pejuanglendir-telegram-publisher .pltp-settings-table td {
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    .settings_page_pejuanglendir-telegram-publisher .pltp-settings-table th {
+        padding: 12px 4px 3px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .settings_page_pejuanglendir-telegram-publisher .pltp-settings-table td {
+        padding: 4px 4px 12px;
+    }
+
+    .settings_page_pejuanglendir-telegram-publisher .pltp-settings-table input[type="text"],
+    .settings_page_pejuanglendir-telegram-publisher .pltp-settings-table input[type="password"],
+    .settings_page_pejuanglendir-telegram-publisher .pltp-settings-table input[type="url"],
+    .settings_page_pejuanglendir-telegram-publisher .pltp-settings-table input[type="number"],
+    .settings_page_pejuanglendir-telegram-publisher .pltp-settings-table select,
+    .settings_page_pejuanglendir-telegram-publisher .pltp-settings-table textarea {
+        box-sizing: border-box;
+        width: 100% !important;
+        max-width: none !important;
+        min-height: 44px;
+        margin: 0;
+        font-size: 16px;
+    }
+
+    .settings_page_pejuanglendir-telegram-publisher .pltp-settings-table textarea {
+        min-height: 108px;
+        resize: vertical;
+    }
+
+    .settings_page_pejuanglendir-telegram-publisher .pltp-settings-table input[type="checkbox"] {
+        width: 22px;
+        height: 22px;
+        margin: 0 8px 0 0;
+        vertical-align: middle;
+    }
+
+    .settings_page_pejuanglendir-telegram-publisher .pltp-settings-table label {
+        display: inline-flex;
+        align-items: flex-start;
+        min-height: 32px;
+        line-height: 1.45;
+    }
+
+    .settings_page_pejuanglendir-telegram-publisher .pltp-section-toggle-row {
+        display: block;
+        margin: 12px 0 2px;
+        padding: 0;
+        border: 0;
+    }
+
+    .settings_page_pejuanglendir-telegram-publisher .pltp-section-toggle-row td {
+        display: block;
+        padding: 0 !important;
+    }
+
+    .settings_page_pejuanglendir-telegram-publisher .pltp-section-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        min-height: 48px;
+        padding: 10px 12px;
+        border: 1px solid #c3c4c7;
+        border-radius: 7px;
+        background: #fff;
+        color: #1d2327;
+        font-size: 14px;
+        font-weight: 600;
+        text-align: left;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+        cursor: pointer;
+    }
+
+    .settings_page_pejuanglendir-telegram-publisher .pltp-section-toggle:focus {
+        border-color: #2271b1;
+        box-shadow: 0 0 0 1px #2271b1;
+        outline: 2px solid transparent;
+    }
+
+    .settings_page_pejuanglendir-telegram-publisher .pltp-section-toggle-icon {
+        flex: 0 0 auto;
+        margin-left: 12px;
+        font-size: 18px;
+        line-height: 1;
+    }
+
+    .settings_page_pejuanglendir-telegram-publisher .pltp-section-row.pltp-section-collapsed {
+        display: none !important;
+    }
+
+    .settings_page_pejuanglendir-telegram-publisher .pltp-submit-bar {
+        position: sticky;
+        bottom: 0;
+        z-index: 50;
+        margin: 16px -4px 0;
+        padding: 8px 4px calc(8px + env(safe-area-inset-bottom));
+        border-top: 1px solid #c3c4c7;
+        background: rgba(240, 240, 241, .96);
+        backdrop-filter: blur(8px);
+    }
+
+    .settings_page_pejuanglendir-telegram-publisher .pltp-submit-bar .submit {
+        margin: 0;
+        padding: 0;
+    }
+
+    .settings_page_pejuanglendir-telegram-publisher .pltp-submit-bar .button-primary {
+        width: 100%;
+        min-height: 46px;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .settings_page_pejuanglendir-telegram-publisher .wrap > hr {
+        margin: 20px 0 10px;
+    }
+
+    .settings_page_pejuanglendir-telegram-publisher .wrap > h2 {
+        margin: 10px 0 6px;
+        font-size: 17px;
+    }
+
+    .settings_page_pejuanglendir-telegram-publisher .wrap a.button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        margin: 2px 4px 4px 0;
+    }
+}
