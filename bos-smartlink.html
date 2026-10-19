@@ -1,0 +1,230 @@
+<!-- BOS SMARTLINK OVERLAY VIDUK.FUN -->
+<style>
+#player-shell {
+  position: relative !important;
+}
+
+/* --bos-controls = tinggi area bawah player yang dibiarkan bebas untuk tombol kontrol */
+#player-shell > #bosAdsOverlay {
+  position: absolute !important;
+  inset: 0 0 var(--bos-controls, 48px) 0 !important;
+  z-index: 2147483000 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.04);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+#player-shell > #bosAdsOverlay[hidden] {
+  display: none !important;
+}
+
+#bosAdsOverlay svg {
+  width: 56px;
+  height: 56px;
+  opacity: .14;
+  pointer-events: none;
+}
+
+#player-shell > #ad-layer {
+  z-index: 2147483001 !important;
+}
+</style>
+
+<script>
+(function () {
+  'use strict';
+
+  // PENGATURAN
+  var BATAS_PER_VIDEO = 4;
+  var JEDA_DETIK_VIDEO = 10;
+
+  function isHttp(url) {
+    try {
+      return /^https?:$/.test(new URL(url).protocol);
+    } catch (err) {
+      return false;
+    }
+  }
+
+  function initBosSmartlink() {
+    var shell = document.getElementById('player-shell');
+    var video = document.getElementById('main-video');
+    var adLayer = document.getElementById('ad-layer');
+    var startButton = document.getElementById('start-play');
+    var directNode = document.getElementById('direct-data');
+    var playerNode = document.getElementById('player-data');
+
+    if (!shell || !video || !directNode || !playerNode) return;
+    if (document.getElementById('bosAdsOverlay')) return;
+
+    var direct, player;
+
+    try {
+      direct = JSON.parse(directNode.textContent);
+      player = JSON.parse(playerNode.textContent);
+    } catch (err) {
+      console.warn('[BOS] Data Smartlink tidak valid', err);
+      return;
+    }
+
+    // SMARTLINK: diambil dari dashboard lewat #direct-data
+    var links = (Array.isArray(direct.links) ? direct.links : [])
+      .map(function (link) {
+        return typeof link === 'string' ? link.trim() : '';
+      })
+      .filter(function (link, index, arr) {
+        return isHttp(link) && arr.indexOf(link) === index;
+      })
+      .slice(0, BATAS_PER_VIDEO);
+
+    var id = String(
+      player.id ||
+      direct.id ||
+      new URLSearchParams(location.search).get('v') ||
+      ''
+    ).trim();
+
+    if (!links.length || !id) return;
+
+    // Link yang sudah diklik pada video ini (1 klik per link)
+    var key = 'bos-smartlink-v3:' + location.hostname + ':' + id;
+    var used = [];
+
+    try {
+      used = JSON.parse(sessionStorage.getItem(key) || '[]')
+        .filter(function (link) {
+          return links.indexOf(link) !== -1;
+        });
+    } catch (err) {}
+
+    var overlay = document.createElement('a');
+
+    overlay.id = 'bosAdsOverlay';
+    overlay.target = '_blank';
+    overlay.rel = 'noopener noreferrer sponsored';
+    overlay.title = 'Buka sponsor dan putar video';
+    overlay.setAttribute('aria-label', overlay.title);
+    overlay.hidden = true;
+    overlay.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="white" aria-hidden="true">' +
+      '<path d="M8 5v14l11-7z"/></svg>';
+
+    shell.appendChild(overlay);
+
+    var sudahKlik = false;
+    var munculLagiPadaDetik = Infinity;
+    var linkAktif = '';
+
+    function iklanAsliAktif() {
+      if (!adLayer || adLayer.hidden) return false;
+
+      var s = getComputedStyle(adLayer);
+
+      return s.display !== 'none' &&
+        s.visibility !== 'hidden' &&
+        parseFloat(s.opacity || '1') > 0.01 &&
+        s.pointerEvents !== 'none';
+    }
+
+    function sembunyikan() {
+      overlay.hidden = true;
+      linkAktif = '';
+    }
+
+    function perbarui() {
+      var sisa = links.filter(function (link) {
+        return used.indexOf(link) === -1;
+      });
+
+      var fullscreen = !!(
+        document.fullscreenElement ||
+        document.webkitFullscreenElement
+      );
+
+      var tunggu = sudahKlik &&
+        (video.paused || video.currentTime < munculLagiPadaDetik);
+
+      if (
+        !sisa.length ||
+        document.hidden ||
+        video.ended ||
+        fullscreen ||
+        iklanAsliAktif() ||
+        tunggu
+      ) {
+        sembunyikan();
+        return;
+      }
+
+      // Pertahankan link yang sedang tampil, acak hanya jika belum ada
+      if (!overlay.hidden && sisa.indexOf(linkAktif) !== -1) return;
+
+      linkAktif = sisa[Math.floor(Math.random() * sisa.length)];
+      overlay.href = linkAktif;
+      overlay.hidden = false;
+    }
+
+    // Link dibuka native lewat target="_blank"
+    overlay.addEventListener('click', function (event) {
+      if (
+        overlay.hidden ||
+        !linkAktif ||
+        used.indexOf(linkAktif) !== -1 ||
+        iklanAsliAktif()
+      ) {
+        event.preventDefault();
+        return;
+      }
+
+      used.push(linkAktif);
+
+      try {
+        sessionStorage.setItem(key, JSON.stringify(used));
+      } catch (err) {}
+
+      sudahKlik = true;
+      munculLagiPadaDetik =
+        (Number(video.currentTime) || 0) + JEDA_DETIK_VIDEO;
+
+      sembunyikan();
+
+      // Jalankan Play asli (termasuk preroll bawaan)
+      if (video.paused && video.currentTime < 0.25 && startButton) {
+        startButton.click();
+      }
+    });
+
+    ['timeupdate', 'play', 'playing', 'pause', 'ended', 'seeked']
+      .forEach(function (name) {
+        video.addEventListener(name, perbarui);
+      });
+
+    ['visibilitychange', 'fullscreenchange', 'webkitfullscreenchange']
+      .forEach(function (name) {
+        document.addEventListener(name, perbarui);
+      });
+
+    video.addEventListener('webkitbeginfullscreen', sembunyikan);
+    video.addEventListener('webkitendfullscreen', perbarui);
+
+    if (adLayer) {
+      new MutationObserver(perbarui).observe(adLayer, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'hidden', 'aria-hidden']
+      });
+    }
+
+    perbarui();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBosSmartlink, { once: true });
+  } else {
+    initBosSmartlink();
+  }
+})();
+</script>
