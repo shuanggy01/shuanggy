@@ -1,0 +1,212 @@
+<!-- BOS ANTI ADBLOCK VIDUK.FUN -->
+<style>
+#player-shell {
+  position: relative !important;
+}
+
+#bosAdblockNotice {
+  position: absolute;
+  inset: 0;
+  z-index: 2147483002;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 16px;
+  background: rgba(0,0,0,.82);
+  color: #fff;
+  font: 14px/1.5 system-ui, sans-serif;
+  text-align: center;
+}
+
+#bosAdblockNotice.bos-fixed {
+  position: fixed;
+}
+
+#bosAdblockNotice .bos-box {
+  max-width: 360px;
+}
+
+#bosAdblockNotice strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+#bosAdblockNotice .bos-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+#bosAdblockNotice button {
+  padding: 8px 14px;
+  border: 1px solid #fff;
+  border-radius: 6px;
+  background: #fff;
+  color: #111;
+  font: inherit;
+  cursor: pointer;
+}
+
+#bosAdblockNotice button.bos-ghost {
+  background: transparent;
+  color: #fff;
+  border-color: rgba(255,255,255,.5);
+}
+</style>
+
+<script>
+(function () {
+  'use strict';
+
+  // PENGATURAN
+  var TUNGGU_MS = 800;
+  var TIMEOUT_JARINGAN_MS = 4000;
+  var KEY_TUTUP = 'bos-adblock-tutup';
+
+  function sudahDitutup() {
+    try {
+      return sessionStorage.getItem(KEY_TUTUP) === '1';
+    } catch (err) {
+      return false;
+    }
+  }
+
+  // Umpan 1: elemen dengan class iklan, biasanya disembunyikan/dihapus adblock
+  function buatUmpan() {
+    var umpan = document.createElement('div');
+
+    umpan.className = 'adsbox ad-banner ad-placeholder pub_300x250 text-ad textAd';
+    umpan.style.cssText = 'position:absolute;left:-9999px;top:0;width:10px;height:10px;';
+    document.body.appendChild(umpan);
+
+    return umpan;
+  }
+
+  function umpanDiblokir(umpan) {
+    var diblokir = !umpan.parentNode;
+
+    if (!diblokir) {
+      var s = getComputedStyle(umpan);
+
+      diblokir = !umpan.offsetHeight ||
+        s.display === 'none' ||
+        s.visibility === 'hidden';
+
+      umpan.remove();
+    }
+
+    return diblokir;
+  }
+
+  // Umpan 2: domain sponsor dari #direct-data (hanya origin, bukan link iklannya)
+  function sponsorDiblokir() {
+    var origin;
+
+    try {
+      var link = new URL(
+        JSON.parse(document.getElementById('direct-data').textContent).links[0]
+      );
+
+      if (!/^https?:$/.test(link.protocol)) return Promise.resolve(false);
+      if (location.protocol === 'https:' && link.protocol !== 'https:') return Promise.resolve(false);
+
+      origin = link.origin + '/';
+    } catch (err) {
+      return Promise.resolve(false);
+    }
+
+    if (!window.fetch || !window.AbortController || !navigator.onLine) {
+      return Promise.resolve(false);
+    }
+
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, TIMEOUT_JARINGAN_MS);
+
+    return fetch(origin, {
+      mode: 'no-cors',
+      cache: 'no-store',
+      credentials: 'omit',
+      referrerPolicy: 'no-referrer',
+      signal: ctrl.signal
+    }).then(function () {
+      return false;
+    }, function (err) {
+      // Timeout = koneksi lambat, bukan diblokir
+      return err.name !== 'AbortError';
+    }).then(function (diblokir) {
+      clearTimeout(timer);
+      return diblokir;
+    });
+  }
+
+  function tutup() {
+    var notice = document.getElementById('bosAdblockNotice');
+
+    if (notice) notice.remove();
+    document.removeEventListener('keydown', saatEsc);
+
+    try {
+      sessionStorage.setItem(KEY_TUTUP, '1');
+    } catch (err) {}
+  }
+
+  function saatEsc(event) {
+    if (event.key === 'Escape') tutup();
+  }
+
+  function tampilkanPeringatan() {
+    if (sudahDitutup() || document.getElementById('bosAdblockNotice')) return;
+
+    var shell = document.getElementById('player-shell');
+    var notice = document.createElement('div');
+
+    notice.id = 'bosAdblockNotice';
+    notice.className = shell ? '' : 'bos-fixed';
+    notice.setAttribute('role', 'alertdialog');
+    notice.setAttribute('aria-label', 'Adblock terdeteksi');
+    notice.innerHTML =
+      '<div class="bos-box">' +
+      '<strong>Adblock terdeteksi</strong>' +
+      'Situs ini gratis berkat iklan. Mohon matikan adblock untuk situs ini, lalu muat ulang halaman.' +
+      '<div class="bos-btns">' +
+      '<button type="button" data-aksi="muat">Sudah dimatikan, muat ulang</button>' +
+      '<button type="button" class="bos-ghost" data-aksi="tutup">Tutup</button>' +
+      '</div></div>';
+
+    notice.addEventListener('click', function (event) {
+      var aksi = event.target.getAttribute('data-aksi');
+
+      if (aksi === 'muat') location.reload();
+      if (aksi === 'tutup') tutup();
+    });
+
+    document.addEventListener('keydown', saatEsc);
+    (shell || document.body).appendChild(notice);
+    notice.querySelector('button').focus({ preventScroll: true });
+  }
+
+  function mulai() {
+    if (sudahDitutup()) return;
+
+    var umpan = buatUmpan();
+
+    // Beri waktu adblock menerapkan filter-nya sebelum diperiksa
+    setTimeout(function () {
+      Promise.resolve(umpanDiblokir(umpan) || sponsorDiblokir())
+        .then(function (diblokir) {
+          if (diblokir) tampilkanPeringatan();
+        });
+    }, TUNGGU_MS);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', mulai, { once: true });
+  } else {
+    mulai();
+  }
+})();
+</script>
