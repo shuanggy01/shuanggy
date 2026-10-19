@@ -72,8 +72,8 @@ try {
             $dir=ROOT.'/public/thumbs';if(!is_dir($dir)&&!@mkdir($dir,0755,true))throw new RuntimeException('Folder public/thumbs tidak bisa dibuat. Periksa izin folder di aaPanel.');
             if(!is_file($dir.'/.htaccess'))@file_put_contents($dir.'/.htaccess',"Options -Indexes\n<FilesMatch \"(?i)\\.(php\\d?|phtml|phar|html?|js)$\">\nRequire all denied\n</FilesMatch>\n");
             if(!move_uploaded_file($f['tmp_name'],$dir.'/'.$name))throw new RuntimeException('Gambar tidak bisa disimpan. Periksa izin folder public/thumbs.');
-            $https=!empty($_SERVER['HTTPS'])&&$_SERVER['HTTPS']!=='off'||($_SERVER['HTTP_X_FORWARDED_PROTO']??'')==='https';
-            $url=($https?'https':'http').'://'.preg_replace('/[^a-z0-9.:-]/i','',(string)($_SERVER['HTTP_HOST']??'localhost')).'/thumbs/'.$name;
+            // Relative path: works on http/https, behind Cloudflare, and with any domain.
+            $url='/thumbs/'.$name;
         }
         db()->prepare('UPDATE videos SET thumb_url=? WHERE id=?')->execute([$url,$v['id']]);jsonOut(['ok'=>true,'thumb_url'=>$url]);
     case 'thumb_set':

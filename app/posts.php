@@ -124,6 +124,12 @@ function registerPost(string $id,string $title,string $type,string $value): arra
         db()->exec('COMMIT');return ['ok'=>true,'id'=>$id,'type'=>$type,'duplicate'=>false,'path'=>$type==='video'?postPath(['id'=>$id,'video_url'=>$videoUrl]):'/?v='.rawurlencode($id)];
     }catch(Throwable $e){db()->exec('ROLLBACK');throw $e;}
 }
+// Thumbnails uploaded to this server are shown by path, so a stored http:// URL (HTTPS terminated by a proxy)
+// never becomes blocked mixed content.
+function localThumb(string $u): string {
+    if($u!==''&&preg_match('~^https?://([^/]+)(/thumbs/[^?#]+)$~i',$u,$m)&&strcasecmp($m[1],(string)($_SERVER['HTTP_HOST']??''))===0)return $m[2];
+    return $u;
+}
 // Short public IDs (5 letters/digits). The same seed always gives the same ID, so a retried bot request
 // finds its own post again; if the short ID belongs to a different post, the next length is tried.
 function shortPostId(string $seed,int $len): string {
