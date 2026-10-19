@@ -41,6 +41,8 @@
   // PENGATURAN
   var BATAS_PER_VIDEO = 4;
   var JEDA_DETIK_VIDEO = 10;
+  var RETRY_MS = 500;
+  var RETRY_MAKS_MS = 10000;
 
   function isHttp(url) {
     try {
@@ -50,6 +52,7 @@
     }
   }
 
+  // true = selesai (terpasang atau tidak perlu), false = player/data belum siap
   function initBosSmartlink() {
     var shell = document.getElementById('player-shell');
     var video = document.getElementById('main-video');
@@ -58,8 +61,8 @@
     var directNode = document.getElementById('direct-data');
     var playerNode = document.getElementById('player-data');
 
-    if (!shell || !video || !directNode || !playerNode) return;
-    if (document.getElementById('bosAdsOverlay')) return;
+    if (document.getElementById('bosAdsOverlay')) return true;
+    if (!shell || !video || !directNode || !playerNode) return false;
 
     var direct, player;
 
@@ -67,8 +70,7 @@
       direct = JSON.parse(directNode.textContent);
       player = JSON.parse(playerNode.textContent);
     } catch (err) {
-      console.warn('[BOS] Data Smartlink tidak valid', err);
-      return;
+      return false;
     }
 
     // SMARTLINK: diambil dari dashboard lewat #direct-data
@@ -88,7 +90,7 @@
       ''
     ).trim();
 
-    if (!links.length || !id) return;
+    if (!links.length || !id) return true;
 
     // Link yang sudah diklik pada video ini (1 klik per link)
     var key = 'bos-smartlink-v3:' + location.hostname + ':' + id;
@@ -219,12 +221,29 @@
     }
 
     perbarui();
+    return true;
+  }
+
+  function mulai() {
+    var lama = 0;
+
+    (function coba() {
+      if (initBosSmartlink()) return;
+
+      if (lama >= RETRY_MAKS_MS) {
+        console.warn('[BOS] Player atau data Smartlink tidak siap');
+        return;
+      }
+
+      lama += RETRY_MS;
+      setTimeout(coba, RETRY_MS);
+    })();
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initBosSmartlink, { once: true });
+    document.addEventListener('DOMContentLoaded', mulai, { once: true });
   } else {
-    initBosSmartlink();
+    mulai();
   }
 })();
 </script>
