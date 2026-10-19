@@ -124,6 +124,19 @@ function registerPost(string $id,string $title,string $type,string $value): arra
         db()->exec('COMMIT');return ['ok'=>true,'id'=>$id,'type'=>$type,'duplicate'=>false,'path'=>$type==='video'?postPath(['id'=>$id,'video_url'=>$videoUrl]):'/?v='.rawurlencode($id)];
     }catch(Throwable $e){db()->exec('ROLLBACK');throw $e;}
 }
+// Short public IDs (5 letters/digits). The same seed always gives the same ID, so a retried bot request
+// finds its own post again; if the short ID belongs to a different post, the next length is tried.
+function shortPostId(string $seed,int $len): string {
+    $abc='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';$h=hash('sha256',$seed,true);$o='';
+    for($i=0;$i<$len;$i++)$o.=$abc[ord($h[$i])%62];return $o;
+}
+function registerShort(string $seed,string $title,string $type,string $value,int $start=5): array {
+    for($len=$start;$len<=12;$len++){
+        try{return registerPost(shortPostId($seed,$len),$title,$type,$value);}
+        catch(RuntimeException $e){if($e->getMessage()!=='ID sudah dipakai posting berbeda.')throw $e;}
+    }
+    throw new RuntimeException('Gagal membuat ID pendek unik.');
+}
 function collectionItems(array $folder): array {
     $out=[];foreach(json_decode($folder['items'],true)??[] as $id){$v=findVideo($id);if($v){$out[]=$v;continue;}$l=extraPost($id);if($l&&$l['kind']==='link')$out[]=['id'=>$id,'title'=>$l['title'],'thumb_url'=>'assets/placeholder.svg','views'=>0];}return $out;
 }

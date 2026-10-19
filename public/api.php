@@ -39,17 +39,17 @@ try {
     case 'r2_test':
         (new R2(r2Config()))->request('GET','',['list-type'=>'2','max-keys'=>'1']);jsonOut(['ok'=>true,'message'=>'Koneksi dan izin baca bucket berhasil. Posting link tidak memerlukan upload browser.']);
     case 'publish_url':
-        $id=bin2hex(random_bytes(6));$title=(string)($input['title']??'');
+        $title=(string)($input['title']??'');
         $video=(string)($input['video_url']??'');$thumb=(string)($input['thumb_url']??'');
         if(str_contains($video,'||')||str_contains($thumb,'||'))throw new RuntimeException('URL tidak valid.');
-        $out=registerPost($id,$title,'video',$video.'||'.$thumb);
+        $out=registerShort(bin2hex(random_bytes(8)),$title,'video',$video.'||'.$thumb);$id=$out['id'];
         $folderId=(string)($input['folder']??'');
         if($folderId!==''){try{appendFolder($folderId,[$id]);}catch(RuntimeException $e){throw new RuntimeException('Video terbit, tetapi gagal masuk folder: '.$e->getMessage());}}
         jsonOut($out);
     case 'folder_save':
         $items=$input['items']??[];if(!is_array($items))throw new RuntimeException('Isi folder tidak valid.');
         $folderId=(string)($input['id']??'');$title=(string)($input['title']??'');
-        if($folderId==='')jsonOut(registerPost(bin2hex(random_bytes(6)),$title,'folder',implode(',',array_map('strval',$items))));
+        if($folderId==='')jsonOut(registerShort(bin2hex(random_bytes(8)),$title,'folder',implode(',',array_map('strval',$items))));
         updateFolder($folderId,$title,liveItems($items),true);jsonOut(['ok'=>true,'id'=>$folderId]);
     case 'items_reorder':
         $order=$input['order']??[];if(!is_array($order))throw new RuntimeException('Urutan tidak valid.');
