@@ -14,7 +14,6 @@
 .download-ad>iframe{display:block;width:100%;border:0;background:#111}
 /* .viewer-main / .download-main are grids: the banner must not push its track wider than the screen. */
 .top-ad{display:block;width:100%;min-width:0;box-sizing:border-box;contain:inline-size}
-.top-ad.ad-empty{display:none}
 /* Watch page: the banner is its own auto row between header and player, so the player keeps its 1fr track. */
 body:not(.watch-page) .top-ad{padding:0 16px;margin-top:16px}
 @media(max-width:767px),(max-height:560px) and (pointer:coarse){

@@ -20,7 +20,10 @@
   const run = () => {
     boxes.forEach(fit);
     // Nothing rendered after ~5s (ad blocker, no fill): collapse the empty gap; reopen if it fills later.
-    if (tick >= 5) boxes.forEach(b => b.classList.toggle('ad-empty', !filled(b)));
+    if (tick >= 5) boxes.forEach(b => { if (!b.hasAttribute('data-lazy')) b.classList.toggle('ad-empty', !filled(b)); });
+    // Top banner starts collapsed and opens once, early, when it has filled: a late layout change
+    // would resize the player while the video plays.
+    if (tick <= 10) boxes.forEach(b => { if (b.hasAttribute('data-lazy')) b.classList.toggle('ad-empty', !filled(b)); });
   };
   run();
   addEventListener('resize', () => boxes.forEach(fit), { passive: true });

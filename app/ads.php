@@ -146,7 +146,7 @@ function adCodeHtml(string $content): string {
     return '<script>'.$c.'</script>';
 }
 function adBoxMark(): void {$GLOBALS['adbox_used']=true;}
-function adBoxScript(): void {if(!empty($GLOBALS['adbox_used']))echo '<script src="assets/adbox.js?v=2" defer></script>';}
+function adBoxScript(): void {if(!empty($GLOBALS['adbox_used']))echo '<script src="assets/adbox.js?v=3" defer></script>';}
 function adFit(string $inner,int $w,int $h): string {
     return '<div class="ad-fit" data-w="'.$w.'" data-h="'.$h.'" style="--w:'.$w.';--h:'.$h.'"><div class="ad-fit-inner">'.$inner.'</div></div>';
 }
@@ -179,7 +179,7 @@ function adTopBanner(array $site): void {
     }
     $code=adCodeHtml($ad['content']);if($code==='')return;
     [$w,$h]=adBoxSize($ad['content'],728,90);adBoxMark();
-    echo '<div class="top-ad" data-adbox aria-label="Iklan">'.adFit($code,$w,$h).'</div>';
+    echo '<div class="top-ad ad-empty" data-adbox data-lazy aria-label="Iklan">'.adFit($code,$w,$h).'</div>';
 }
 // Verification <meta> tags are rebuilt from scratch: only name/property + content survive,
 // so nothing else (scripts, refresh, charset) can slip into <head>.
