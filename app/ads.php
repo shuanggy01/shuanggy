@@ -102,7 +102,10 @@ function adAgeGate(array $site): void {
     $json=json_encode(['links'=>$links,'times'=>adTimes((string)$ad['times'])],JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_SLASHES);
     echo '<link rel="stylesheet" href="assets/agegate.css?v=1"><script type="application/json" id="agegate-data">'.$json.'</script><script src="assets/agegate.js?v=1" defer></script>';
 }
+// A logged-in admin never sees ads (own views/clicks must not count). Add ?ads=1 to the URL to preview them.
+function adsOffForAdmin(): bool {return !empty($_SESSION['admin'])&&!isset($_GET['ads']);}
 function adFind(array $site,string $slot): ?array {
+    if($slot!=='head_meta'&&adsOffForAdmin())return null;
     foreach($site['ads'] as $ad)if($ad['slot']===$slot&&!empty($ad['enabled'])&&trim($ad['content'])!=='')return $ad;return null;
 }
 // Data sent to the player (raw HTML stays server-side, served by ad.php).
