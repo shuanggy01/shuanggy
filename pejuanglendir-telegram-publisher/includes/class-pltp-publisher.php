@@ -307,7 +307,7 @@ final class PLTP_Publisher
         $rotation_r2_ready = self::rotation_r2_config_ready();
         ?>
         <div class="wrap">
-            <h1>PejuangLendir Telegram Publisher V1.9.3</h1>
+            <h1>PejuangLendir Telegram Publisher V1.9.3.1</h1>
 
             <p><strong>Format Telegram — aktor & thumbnail opsional:</strong></p>
             <pre style="background:#fff;border:1px solid #ccd0d4;padding:12px;max-width:760px;">video_viral_hari_ini
@@ -635,7 +635,9 @@ https://cdn.example.com/thumb-2.jpg</pre>
                                 Status: <?php if (class_exists('PLTP_Inline_Media') && PLTP_Inline_Media::can_run()): ?>
                                     <strong style="color:#16833b;">SIAP</strong>
                                 <?php else: ?>
-                                    <strong style="color:#b32d2e;">TIDAK TERSEDIA</strong> — worker/cron lama dipakai sebagai cadangan.
+                                    <strong style="color:#b32d2e;">TIDAK TERSEDIA</strong>
+                                    (<?php echo esc_html(class_exists('PLTP_Inline_Media') ? implode(', ', PLTP_Inline_Media::missing()) : 'class tidak dimuat'); ?>)
+                                    — worker/cron lama dipakai sebagai cadangan.
                                 <?php endif; ?>
                             </p>
                         </td>

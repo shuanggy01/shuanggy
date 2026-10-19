@@ -31,7 +31,36 @@ final class PLTP_Inline_Media
 
     public static function can_run(): bool
     {
-        return function_exists('proc_open') && self::binary('ffmpeg') !== '' && self::binary('ffprobe') !== '';
+        return self::missing() === [];
+    }
+
+    /** Human-readable list of what blocks inline mode (empty = ready). */
+    public static function missing(): array
+    {
+        $missing = [];
+        if (!self::proc_open_allowed()) {
+            return ['proc_open diblokir (disable_functions)'];
+        }
+        foreach (['ffmpeg', 'ffprobe'] as $name) {
+            if (self::binary($name) === '') {
+                $missing[] = $name . ' tidak ditemukan';
+            }
+        }
+        return $missing;
+    }
+
+    private static function proc_open_allowed(): bool
+    {
+        if (!function_exists('proc_open') || !function_exists('proc_get_status')) {
+            return false;
+        }
+        $disabled = array_map('trim', explode(',', (string) ini_get('disable_functions')));
+        foreach (['proc_open', 'proc_get_status', 'proc_close', 'proc_terminate'] as $fn) {
+            if (in_array($fn, $disabled, true)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /** Called once the post and its pending flags exist. */
@@ -262,6 +291,15 @@ final class PLTP_Inline_Media
         foreach ($paths as $path) {
             if ($path !== '' && @is_file($path) && @is_executable($path)) {
                 return $cache[$name] = $path;
+            }
+        }
+        // aaPanel's open_basedir hides /usr/bin from is_file(), but proc_open is
+        // not restricted by it: probe each candidate by actually running it.
+        if (self::proc_open_allowed()) {
+            foreach ($paths as $path) {
+                if ($path !== '' && self::run([$path, '-version'], 10)['code'] === 0) {
+                    return $cache[$name] = $path;
+                }
             }
         }
         return $cache[$name] = '';

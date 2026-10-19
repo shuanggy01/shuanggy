@@ -1,4 +1,4 @@
-PejuangLendir Telegram Publisher V1.9.3
+PejuangLendir Telegram Publisher V1.9.3.1
 
 AUTO THUMBNAIL ROTATION
 -----------------------
@@ -231,3 +231,7 @@ V1.9.3 Proses Langsung (tanpa worker)
   (path dicari otomatis; bisa ditentukan lewat define('PLTP_FFMPEG','/path') di wp-config.php).
 - Jika gagal/tidak tersedia, post tetap di antrean dan worker lama jadi cadangan. Bisa dimatikan di Settings > Proses Langsung.
 - Pastikan proc_open tidak ada di disable_functions php.ini.
+
+V1.9.3.1
+- Deteksi ffmpeg/ffprobe tetap berhasil walau open_basedir aaPanel aktif.
+- Status "Proses Langsung" sekarang menyebut penyebabnya (proc_open diblokir / ffmpeg tidak ditemukan).
