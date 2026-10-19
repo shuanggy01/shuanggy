@@ -38,8 +38,9 @@ final class PLTP_Inline_Media
     public static function missing(): array
     {
         $missing = [];
-        if (!self::proc_open_allowed()) {
-            return ['proc_open diblokir (disable_functions)'];
+        $blocked = array_filter(['proc_open', 'proc_close'], static fn($fn) => !self::fn_allowed($fn));
+        if ($blocked) {
+            return [implode(' & ', $blocked) . ' diblokir di disable_functions'];
         }
         foreach (['ffmpeg', 'ffprobe'] as $name) {
             if (self::binary($name) === '') {
@@ -49,18 +50,19 @@ final class PLTP_Inline_Media
         return $missing;
     }
 
-    private static function proc_open_allowed(): bool
+    private static function fn_allowed(string $fn): bool
     {
-        if (!function_exists('proc_open') || !function_exists('proc_get_status')) {
+        if (!function_exists($fn)) {
             return false;
         }
         $disabled = array_map('trim', explode(',', (string) ini_get('disable_functions')));
-        foreach (['proc_open', 'proc_get_status', 'proc_close', 'proc_terminate'] as $fn) {
-            if (in_array($fn, $disabled, true)) {
-                return false;
-            }
-        }
-        return true;
+        return !in_array($fn, $disabled, true);
+    }
+
+    /** Only proc_open + proc_close are required; aaPanel often blocks proc_get_status. */
+    private static function proc_open_allowed(): bool
+    {
+        return self::fn_allowed('proc_open') && self::fn_allowed('proc_close');
     }
 
     /** Called once the post and its pending flags exist. */
@@ -248,6 +250,9 @@ final class PLTP_Inline_Media
     /** @return array{code:int,out:string} no shell is involved; argv array only. */
     private static function run(array $argv, int $timeout): array
     {
+        if (!self::fn_allowed('proc_get_status') || !self::fn_allowed('proc_terminate')) {
+            return self::run_blocking($argv, $timeout);
+        }
         $proc = @proc_open($argv, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
         if (!is_resource($proc)) {
             return ['code' => 1, 'out' => ''];
@@ -276,6 +281,33 @@ final class PLTP_Inline_Media
         fclose($pipes[1]);
         fclose($pipes[2]);
         proc_close($proc);
+        return ['code' => $code, 'out' => $out];
+    }
+
+    /**
+     * Fallback when proc_get_status/proc_terminate are disabled: coreutils
+     * `timeout` enforces the limit, stdout is read until EOF (stderr goes to
+     * /dev/null so the pipe can never fill up), proc_close gives the exit code.
+     */
+    private static function run_blocking(array $argv, int $timeout): array
+    {
+        $timeout_bin = '';
+        foreach (['/usr/bin/timeout', '/bin/timeout'] as $candidate) {
+            if (@is_executable($candidate) || !@file_exists(dirname($candidate))) {
+                $timeout_bin = $candidate;
+                break;
+            }
+        }
+        if ($timeout_bin !== '') {
+            $argv = array_merge([$timeout_bin, '-s', 'KILL', (string) max(1, $timeout)], $argv);
+        }
+        $proc = @proc_open($argv, [1 => ['pipe', 'w'], 2 => ['file', '/dev/null', 'w']], $pipes);
+        if (!is_resource($proc)) {
+            return ['code' => 1, 'out' => ''];
+        }
+        $out = (string) stream_get_contents($pipes[1]);
+        fclose($pipes[1]);
+        $code = (int) proc_close($proc);
         return ['code' => $code, 'out' => $out];
     }
 

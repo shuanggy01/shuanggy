@@ -307,7 +307,7 @@ final class PLTP_Publisher
         $rotation_r2_ready = self::rotation_r2_config_ready();
         ?>
         <div class="wrap">
-            <h1>PejuangLendir Telegram Publisher V1.9.3.1</h1>
+            <h1>PejuangLendir Telegram Publisher V1.9.3.2</h1>
 
             <p><strong>Format Telegram — aktor & thumbnail opsional:</strong></p>
             <pre style="background:#fff;border:1px solid #ccd0d4;padding:12px;max-width:760px;">video_viral_hari_ini

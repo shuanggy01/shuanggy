@@ -2,7 +2,7 @@
 /**
  * Plugin Name: PejuangLendir Telegram Publisher
  * Description: Telegram publisher with single-frame auto-thumbnail, always-on 5-frame RetroTube rotation, self-detecting OS workers, performance-safe queue, smart titles, actors/tags, and factual descriptions.
- * Version: 1.9.3.1
+ * Version: 1.9.3.2
  * Author: PejuangLendir
  * Requires at least: 6.5
  * Requires PHP: 8.0

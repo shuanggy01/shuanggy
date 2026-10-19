@@ -1,4 +1,4 @@
-PejuangLendir Telegram Publisher V1.9.3.1
+PejuangLendir Telegram Publisher V1.9.3.2
 
 AUTO THUMBNAIL ROTATION
 -----------------------
@@ -235,3 +235,8 @@ V1.9.3 Proses Langsung (tanpa worker)
 V1.9.3.1
 - Deteksi ffmpeg/ffprobe tetap berhasil walau open_basedir aaPanel aktif.
 - Status "Proses Langsung" sekarang menyebut penyebabnya (proc_open diblokir / ffmpeg tidak ditemukan).
+
+V1.9.3.2
+- Proses Langsung hanya butuh proc_open + proc_close. proc_get_status/proc_terminate
+  (diblokir default di aaPanel) tidak lagi wajib; batas waktu memakai /usr/bin/timeout.
+- Pesan status menyebut nama fungsi yang benar-benar diblokir.
