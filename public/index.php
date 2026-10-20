@@ -1,4 +1,6 @@
 <?php
+// Links from the Python bot use ?id=ID; the site itself uses ?v=ID. Accept both.
+if(!isset($_GET['v'])&&isset($_GET['id'])&&is_string($_GET['id']))$_GET['v']=$_GET['id'];
 // Link Shopee/bebas: alihkan secepatnya tanpa sesi, cookie, atau setup tabel.
 // Tujuan per ID tidak pernah berubah, jadi redirect boleh disimpan browser.
 if(!isset($_GET['play'])&&preg_match('/^[a-zA-Z0-9_-]{4,40}$/',(string)($_GET['v']??''))){
