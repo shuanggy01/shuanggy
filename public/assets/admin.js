@@ -139,3 +139,25 @@ $('#bulk-move-go').onclick=()=>{const items=selected().filter(el=>el.dataset.kin
 // Reopen the folder that was being edited before the reload.
 try{const r=JSON.parse(sessionStorage.getItem('studio-reopen')||'null');sessionStorage.removeItem('studio-reopen');
   if(r){openFold('library');const f=r.folder&&$$('.folder').find(x=>x.dataset.id===r.folder);if(f){f.open=true;setTimeout(()=>f.scrollIntoView({block:'start'}),50);}if(r.msg)toast(r.msg);}}catch{}
+
+// Row menus (⋯): a fixed popup (not clipped by the accordion), one open at a time; a click on the
+// thumbnail/title opens the post.
+(()=>{
+  const closeAll=()=>$$('.video-row.menu-open').forEach(r=>{r.classList.remove('menu-open');const b=$('.row-menu-btn',r);if(b)b.setAttribute('aria-expanded','false');});
+  const place=row=>{const btn=$('.row-menu-btn',row),menu=$('.row-actions',row);
+    const r=btn.getBoundingClientRect(),w=menu.offsetWidth,h=menu.offsetHeight;
+    let top=r.bottom+4;if(top+h>innerHeight-8)top=Math.max(8,r.top-h-4);
+    menu.style.left=Math.max(8,Math.min(innerWidth-w-8,r.right-w))+'px';menu.style.top=top+'px';};
+  $$('.video-row').forEach(row=>{
+    const btn=$('.row-menu-btn',row);if(!btn)return;const menu=$('.row-actions',row);
+    btn.addEventListener('click',e=>{e.stopPropagation();const open=row.classList.contains('menu-open');closeAll();if(open)return;
+      row.classList.add('menu-open');btn.setAttribute('aria-expanded','true');
+      place(row);});
+    menu.addEventListener('click',()=>setTimeout(closeAll,0));
+    const open=()=>window.open(row.dataset.path,'_blank','noopener');
+    $('img',row).addEventListener('click',open);$('.video-info',row).addEventListener('click',open);
+  });
+  document.addEventListener('click',e=>{if(!e.target.closest('.row-actions'))closeAll();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAll();});
+  const again=()=>{const r=$('.video-row.menu-open');if(r)place(r);};addEventListener('scroll',again,{passive:true,capture:true});addEventListener('resize',again);
+})();

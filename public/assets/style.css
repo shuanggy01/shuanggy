@@ -113,3 +113,20 @@
 @media(max-width:720px){.video-row.in-folder .row-actions{width:100%}.video-row .row-actions{max-width:none}}
 .video-row .row-actions .text-button{min-height:36px;padding:6px 8px;font-size:12px}
 @media(max-width:720px){.video-row .row-actions{gap:4px}}
+
+/* Compact video list: title/thumbnail open the post, actions live in a ⋯ popup menu. */
+.studio .video-row{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;position:relative;padding:8px 0}
+.studio .video-row>img{width:72px;height:48px;border-radius:7px;cursor:pointer;flex:none}
+.studio .video-row .video-info{flex:1 1 0;min-width:0;cursor:pointer}
+.studio .video-row .video-info h3{font-size:13px;font-weight:600;line-height:1.35;margin:0 0 2px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden}
+.studio .video-row .video-info p{font-size:11px;margin:0}
+.studio .video-row .video-info:hover h3{color:var(--accent)}
+.studio .video-row.in-folder{padding:8px 0}
+.row-menu-btn{flex:none;min-height:38px;width:38px;padding:0;border-radius:10px;background:transparent;color:var(--muted);font-size:20px;line-height:1;border:1px solid transparent}
+.row-menu-btn:hover,.video-row.menu-open .row-menu-btn{background:var(--panel2);border-color:var(--line);color:var(--text)}
+.studio .video-row>.row-actions{display:none;position:fixed;top:0;left:0;z-index:60;flex-direction:column;align-items:stretch;gap:2px;width:min(220px,calc(100vw - 32px));max-width:none;margin:0;padding:6px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 40px #000b}
+.studio .video-row.menu-open>.row-actions{display:flex}
+.studio .video-row>.row-actions>*{width:100%;flex:none;justify-content:flex-start;text-align:left;min-height:40px;padding:8px 12px;font-size:13px;border:0;background:transparent;color:var(--text);border-radius:8px}
+.studio .video-row>.row-actions>*:hover{background:#ffffff10}
+.studio .video-row>.row-actions .danger{color:#ff869d}
+.studio .video-row>.thumb-panel,.studio .video-row>.move-panel{flex:0 0 100%}
