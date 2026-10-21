@@ -161,3 +161,23 @@ try{const r=JSON.parse(sessionStorage.getItem('studio-reopen')||'null');sessionS
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAll();});
   const again=()=>{const r=$('.video-row.menu-open');if(r)place(r);};addEventListener('scroll',again,{passive:true,capture:true});addEventListener('resize',again);
 })();
+
+// View options: layout, thumbnail size and sort order of the library (remembered in this browser).
+(()=>{
+  const lib=$('#library'),btn=$('#view-btn'),panel=$('#view-panel'),list=$('.video-list');if(!lib||!btn||!panel||!list)return;
+  let v={layout:'list',thumb:'small',sort:'date',dir:'desc'};
+  try{Object.assign(v,JSON.parse(localStorage.getItem('studio-view')||'{}'));}catch{}
+  const save=()=>{try{localStorage.setItem('studio-view',JSON.stringify(v));}catch{}};
+  const key={title:r=>r.dataset.title||'',date:r=>Number(r.dataset.ts)||0,views:r=>Number(r.dataset.views)||0};
+  const apply=()=>{
+    lib.classList.remove('v-list','v-grid','v-compact','t-small','t-large');lib.classList.add('v-'+v.layout,'t-'+v.thumb);
+    $$('input[name=layout]',panel).forEach(i=>i.checked=i.value===v.layout);$$('input[name=thumb]',panel).forEach(i=>i.checked=i.value===v.thumb);
+    $$('.view-sort button',panel).forEach(b=>{const on=b.dataset.sort===v.sort;b.classList.toggle('on',on);$('i',b).textContent=on?(v.dir==='asc'?'▲':'▼'):'';});
+    const rows=$$(':scope > .video-row',list),k=key[v.sort],m=v.dir==='asc'?1:-1;
+    rows.sort((a,b)=>{const x=k(a),y=k(b);return (typeof x==='string'?x.localeCompare(y,'id'):x-y)*m;}).forEach(r=>list.append(r));
+  };
+  btn.addEventListener('click',()=>{panel.hidden=!panel.hidden;btn.setAttribute('aria-expanded',String(!panel.hidden));});
+  panel.addEventListener('change',e=>{if(e.target.name==='layout')v.layout=e.target.value;if(e.target.name==='thumb')v.thumb=e.target.value;save();apply();});
+  $$('.view-sort button',panel).forEach(b=>b.addEventListener('click',()=>{if(v.sort===b.dataset.sort)v.dir=v.dir==='asc'?'desc':'asc';else{v.sort=b.dataset.sort;v.dir=v.sort==='title'?'asc':'desc';}save();apply();}));
+  apply();
+})();
