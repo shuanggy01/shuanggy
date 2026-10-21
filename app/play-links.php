@@ -50,6 +50,13 @@ function externalProxy(string $url,array $site): ?string {
     return in_array(strtolower((string)parse_url($url,PHP_URL_HOST)),$hosts,true)?$base.videoToken($url):null;
 }
 function videoSource(array $video,array $site): string {return externalProxy((string)$video['video_url'],$site)??mediaPath((string)$video['video_url'],$site);}
+// Warm up DNS/TLS to the video host while the page loads (only when the source is a full URL, not /media/...).
+function videoPreconnect(array $video,array $site): void {
+    $src=videoSource($video,$site);$p=parse_url($src);
+    if(!$p||empty($p['host'])||!in_array(strtolower($p['scheme']??''),['http','https'],true))return;
+    $o=strtolower($p['scheme']).'://'.$p['host'].(isset($p['port'])?':'.$p['port']:'');
+    echo '<link rel="preconnect" href="'.h($o).'"><link rel="dns-prefetch" href="'.h($o).'">';
+}
 // Thumbnails are not time/IP locked: link previews (Telegram, etc.) fetch them from their own servers.
 function thumbSource(array $video,array $site): string {$t=(string)($video['thumb_url']??'');return $t===''?'assets/placeholder.svg':mediaPath($t,$site,false);}
 function findVideoByToken(string $token): ?array {

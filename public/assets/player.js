@@ -11,9 +11,9 @@ function clearAd(){generation++;clearInterval(timer);clearTimeout(watchdog);adCl
 function safePlay(v,onBlocked){const p=v.play();if(p&&p.catch)p.catch(onBlocked);}
 // The video URL is attached only here (after the start tap and pre-roll), so download
 // managers find nothing before the viewer actually plays.
-function attachSource(){if(!video.getAttribute('src')&&config.m){try{video.src=atob(config.m);}catch{}}}
+function attachSource(){if(!video.getAttribute('src')&&config.m){try{video.preload='auto';video.src=atob(config.m);}catch{}}}
 function playMain(){clearAd();attachSource();setTimeout(loadPopup,1200);state='main';start.hidden=true;controls.hidden=false;message('');safePlay(video,()=>{message('Ketuk ▶ untuk melanjutkan video.');$('#toggle-play').textContent='▶';});}
-function advance(){if(state==='main'||state==='ended')return;clearAd();index++;if(index>=stages.length){playMain();return;}state='ad';showAd(stages[index],false);}
+function advance(){if(state==='main'||state==='ended')return;clearAd();index++;attachSource();if(index>=stages.length){playMain();return;}state='ad';showAd(stages[index],false);}
 
 // Ad frames are created ahead of time (inside the invisible layer) so they are already loaded when shown.
 const frameMap={};
@@ -71,7 +71,7 @@ $('#toggle-play').onclick=toggle;video.addEventListener('click',()=>{if(state===
 video.addEventListener('play',()=>{if(!['main','ended'].includes(state)){video.pause();return;}state='main';$('#toggle-play').textContent='Ⅱ';$('#toggle-play').setAttribute('aria-label','Jeda');message('');});
 video.addEventListener('pause',()=>{if(state!=='main')return;$('#toggle-play').textContent='▶';$('#toggle-play').setAttribute('aria-label','Putar');if(pauseAd&&!video.ended){state='pause';showAd(pauseAd,true);}});
 video.addEventListener('ended',()=>{clearAd();state='ended';controls.hidden=false;$('#toggle-play').textContent='↻';$('#toggle-play').setAttribute('aria-label','Putar ulang');});
-video.addEventListener('error',()=>{clearAd();state='main';start.hidden=true;controls.hidden=false;message('Video tidak dapat dimuat. Periksa koneksi atau coba buka kembali link ini.');});
+video.addEventListener('error',()=>{if(state==='ad'||state==='idle'){video.removeAttribute('src');video.load();return;}clearAd();state='main';start.hidden=true;controls.hidden=false;message('Video tidak dapat dimuat. Periksa koneksi atau coba buka kembali link ini.');});
 video.addEventListener('waiting',()=>{if(state==='main')message('Memuat video…');});video.addEventListener('playing',()=>message(''));
 function time(n){if(!Number.isFinite(n))return '0:00';const s=Math.floor(n);return s>=3600?Math.floor(s/3600)+':'+String(Math.floor(s/60)%60).padStart(2,'0')+':'+String(s%60).padStart(2,'0'):Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
 function update(){const duration=video.duration;$('#time-label').textContent=time(video.currentTime)+' / '+time(duration);$('#seek').value=Number.isFinite(duration)&&duration>0?video.currentTime/duration*100:0;
