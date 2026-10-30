@@ -71,8 +71,9 @@ const withTitle=el=>'▶️ '+itemTitle(el)+'\n'+itemUrl(el);
 const bindCopy=(el,scope)=>{$('.copy-title',scope).onclick=()=>copy(withTitle(el));$('.copy-link',scope).onclick=()=>copy(itemUrl(el));};
 $$('.video-row').forEach(r=>bindCopy(r,r));$$('.folder').forEach(f=>bindCopy(f,$('.folder-actions',f)));
 // Select videos/folders for bulk copy or delete.
-const selected=()=>$$('.sel:checked').map(c=>c.closest('.video-row,.folder')).filter(el=>el&&!el.hidden);
-const topLevel=()=>[...$$('.folder'),...$$('.video-list > .video-row')].filter(el=>!el.hidden);
+const offPage=el=>el.classList.contains('pg-off');
+const selected=()=>$$('.sel:checked').map(c=>c.closest('.video-row,.folder')).filter(el=>el&&!el.hidden&&!offPage(el));
+const topLevel=()=>[...$$('.folder'),...$$('.video-list > .video-row')].filter(el=>!el.hidden&&!offPage(el));
 function syncBulk(){const sel=selected(),n=sel.length;$('#bulk-count').textContent=n+' dipilih';['#bulk-title','#bulk-link','#bulk-delete'].forEach(id=>$(id).disabled=!n);
   $('#bulk-move').disabled=!sel.some(el=>el.dataset.kind!=='folder');$('#bulk-bar').classList.toggle('on',n>0);
   const visible=topLevel();$('#select-all').textContent=(visible.length&&visible.every(el=>$('.sel',el).checked)?'☑':'☐')+' Pilih semua';}
@@ -178,6 +179,32 @@ try{const r=JSON.parse(sessionStorage.getItem('studio-reopen')||'null');sessionS
   };
   btn.addEventListener('click',()=>{panel.hidden=!panel.hidden;btn.setAttribute('aria-expanded',String(!panel.hidden));});
   panel.addEventListener('change',e=>{if(e.target.name==='layout')v.layout=e.target.value;if(e.target.name==='thumb')v.thumb=e.target.value;save();apply();});
-  $$('.view-sort button',panel).forEach(b=>b.addEventListener('click',()=>{if(v.sort===b.dataset.sort)v.dir=v.dir==='asc'?'desc':'asc';else{v.sort=b.dataset.sort;v.dir=v.sort==='title'?'asc':'desc';}save();apply();}));
+  $$('.view-sort button',panel).forEach(b=>b.addEventListener('click',()=>{if(v.sort===b.dataset.sort)v.dir=v.dir==='asc'?'desc':'asc';else{v.sort=b.dataset.sort;v.dir=v.sort==='title'?'asc':'desc';}save();apply();if(window.studioPaginate)window.studioPaginate(true);}));
   apply();
+})();
+
+// Pagination of "Semua video": 30 per page, page numbers in windows of 10. Search/sort act on the whole list first.
+(()=>{
+  const list=$('.video-list'),nav=$('#pager');if(!list||!nav)return;
+  const PER=30,WIN=10;let page=1,busy=false;
+  const rows=()=>$$(':scope > .video-row',list).filter(r=>!r.hidden);
+  function render(){
+    const all=rows(),pages=Math.max(1,Math.ceil(all.length/PER));page=Math.min(Math.max(1,page),pages);
+    $$(':scope > .video-row',list).forEach(r=>r.classList.add('pg-off'));
+    all.slice((page-1)*PER,page*PER).forEach(r=>r.classList.remove('pg-off'));
+    nav.hidden=pages<=1;nav.replaceChildren();if(pages<=1)return;
+    const mk=(t,p,cls='',dis=false)=>{const b=document.createElement('button');b.type='button';b.textContent=t;b.className=cls;b.disabled=dis;b.addEventListener('click',()=>go(p));return b;};
+    const start=Math.floor((page-1)/WIN)*WIN+1,end=Math.min(pages,start+WIN-1);
+    nav.append(mk('«',1,'',page===1),mk('‹',page-1,'',page===1));
+    for(let p=start;p<=end;p++)nav.append(mk(String(p),p,p===page?'on':''));
+    nav.append(mk('›',page+1,'',page===pages),mk('»',pages,'',page===pages));
+    const info=document.createElement('span');info.className='pager-info';info.textContent=`Halaman ${page} dari ${pages} · ${all.length} video`;nav.append(info);
+    syncBulk();
+  }
+  function go(p){page=p;$$('.video-list > .video-row .sel').forEach(c=>{c.checked=false;c.closest('.video-row').classList.remove('picked');});render();list.scrollIntoView({block:'start',behavior:'smooth'});}
+  window.studioPaginate=(first)=>{if(first)page=1;render();};
+  // Re-paginate when rows are re-sorted, removed or moved out of the list.
+  new MutationObserver(()=>{if(busy)return;busy=true;queueMicrotask(()=>{busy=false;render();});}).observe(list,{childList:true});
+  $('#search').addEventListener('input',()=>{page=1;render();});
+  render();
 })();

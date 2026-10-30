@@ -216,9 +216,10 @@ function adCustomCode(array $site,bool $hasPlayer): void {
     echo "\n".$c."\n";
 }
 function adPageEnd(array $site,bool $hasPlayer): void {adBlockCode($site,'body');adCustomCode($site,$hasPlayer);adBoxScript();}
-function adDirect(array $site,string $id): void {
+function adDirect(array $site,string $id,bool $button=true): void {
     $ad=adFind($site,'direct');if(!$ad)return;$p=adParse($ad['content']);if(!$p['links'])return;
     $json=json_encode(['id'=>$id,'links'=>$p['links']],JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT);
+    if(!$button){echo '<script type="application/json" id="direct-data">'.$json.'</script>';return;}
     echo '<a class="button secondary direct-sponsor" data-direct-link href="'.h($p['links'][0]).'" target="_blank" rel="noopener noreferrer sponsored">Sponsor ↗</a><script type="application/json" id="direct-data">'.$json.'</script><script src="assets/direct-v4.js?v=4" defer></script>';
 }
 function adPopup(array $site): void {

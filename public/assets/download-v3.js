@@ -20,6 +20,18 @@
       ready.hidden = false;
     }
   };
+  // First click after the countdown opens the direct link in a new tab; the next click downloads.
+  let links = [];
+  try { links = (JSON.parse(document.querySelector('#direct-data').textContent).links || []).filter(u => /^https:\/\//.test(u)); } catch {}
+  let opened = !links.length;
+  ready.addEventListener('click', e => {
+    if (opened) return;
+    e.preventDefault(); opened = true;
+    let i = 0; try { i = Number(localStorage.getItem('viduk-dl-direct')) || 0; localStorage.setItem('viduk-dl-direct', String((i + 1) % links.length)); } catch {}
+    const a = document.createElement('a');
+    a.href = links[i % links.length]; a.target = '_blank'; a.rel = 'noopener sponsored'; a.click();
+    document.querySelector('#download-help').textContent = 'Tekan tombol Download sekali lagi untuk mulai mengunduh.';
+  });
   timer = setInterval(update, 250);
   document.addEventListener('visibilitychange', update);
   update();
