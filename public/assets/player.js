@@ -39,7 +39,7 @@ function showAd(ad,resume){
   function unavailable(){if(stamp!==generation)return;clearInterval(timer);clearTimeout(watchdog);content.replaceChildren();done();}
   if(ad.kind==='video'){
     adVideo=document.createElement('video');const v=adVideo;v.playsInline=true;v.preload='auto';v.controls=false;v.src=ad.url;content.append(v);
-    if(ad.link){v.style.cursor='pointer';v.addEventListener('click',e=>{e.stopPropagation();window.open(ad.link,'_blank','noopener,noreferrer');});}
+    if(ad.link){v.style.cursor='pointer';v.addEventListener('click',e=>{e.stopPropagation();window.open(ad.link,'_blank','noopener,noreferrer');if(stamp===generation)finish();});}
     let watched=0,last=0;const update=()=>{const now=v.currentTime;const delta=now-last;if(!v.seeking&&!v.paused&&delta>0&&delta<1.5)watched+=delta;last=now;const left=Math.max(0,Math.ceil(ad.seconds-watched));if(left)count.textContent=left;else if(!ready)done();};
     timer=setInterval(()=>{if(!document.hidden)update();else last=v.currentTime;},250);update();
     v.addEventListener('ended',()=>{if(stamp===generation)finish();},{once:true});v.addEventListener('error',unavailable,{once:true});
@@ -49,9 +49,12 @@ function showAd(ad,resume){
   }
   if(ad.kind==='html'){
     const f=frameFor(ad.slot);f.classList.add('on');if(ad.slot!=='preroll'&&f.dataset.used)f.contentWindow&&f.contentWindow.location.reload();f.dataset.used='1';
+    // A click inside the ad frame can't be seen from this page, but it moves focus into the frame: the ad closes and the video plays.
+    const onBlur=()=>setTimeout(()=>{if(stamp===generation&&document.activeElement===f)finish();},0);
+    addEventListener('blur',onBlur);adCleanup=()=>removeEventListener('blur',onBlur);
   }else if(ad.kind==='image'){
     const img=document.createElement('img');img.src=ad.url;img.alt='Iklan';img.onerror=unavailable;
-    if(ad.link){const a=document.createElement('a');a.href=ad.link;a.target='_blank';a.rel='noopener sponsored';a.append(img);content.append(a);}else content.append(img);
+    if(ad.link){const a=document.createElement('a');a.href=ad.link;a.target='_blank';a.rel='noopener sponsored';a.addEventListener('click',()=>setTimeout(()=>{if(stamp===generation)finish();},0));a.append(img);content.append(a);}else content.append(img);
   }
   let left=Math.max(0,Number(ad.seconds)||0);const tick=()=>{if(left)count.textContent=left;else done();};tick();
   if(left)timer=setInterval(()=>{if(!document.hidden)left=Math.max(0,left-1);tick();if(!left)clearInterval(timer);},1000);
