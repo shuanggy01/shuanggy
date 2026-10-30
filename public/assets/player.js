@@ -28,13 +28,12 @@ let popDone=false;function loadPopup(){if(popDone)return;popDone=true;const t=do
 function showAd(ad,resume){
   const stamp=generation;layer.classList.add('ad-on');controls.hidden=true;start.hidden=true;let ready=false;
   const finish=()=>{if(resume)playMain();else advance();};
+  // After the countdown, tapping the dark overlay continues (smartlink opens on that tap).
+  const done=()=>{if(stamp!==generation)return;ready=true;count.textContent='✕';layer.classList.add('ad-done');if(target)tap.hidden=false;};
   const target=ad.kind==='link'?ad.url:(ad.link||'');
-  // ✕ / tap: the ad closes at once and the video continues. The ✕ direct link (if set) opens in a new tab,
-  // so the ad keeps running there instead of holding up the player.
-  const xl=ad.xlinks||[];const go=()=>{const link=xl.length?xl[Math.floor(Math.random()*xl.length)]:target;finish();if(link)window.open(link,'_blank','noopener,noreferrer');};
-  const done=()=>{if(stamp!==generation)return;ready=true;count.textContent='✕';layer.classList.add('ad-done');};
-  // Closable from the first moment: a tap outside the ad, or on ✕, continues straight away.
-  done();
+  // ✕ / continue: the ✕ direct link (if set) opens in a new tab; the ad frame keeps running behind the player.
+  const xl=ad.xlinks||[];const go=()=>{const link=xl.length?xl[Math.floor(Math.random()*xl.length)]:target;if(link)window.open(link,'_blank','noopener,noreferrer');finish();};
+  // Background tap (outside the ad frame) continues after the countdown.
   layer.onclick=e=>{if(!ready||e.target===tap)return;if(e.target.closest&&e.target.closest('a'))return;go();};
   tap.onclick=e=>{e.stopPropagation();if(ready)go();};
   function unavailable(){if(stamp!==generation)return;clearInterval(timer);clearTimeout(watchdog);content.replaceChildren();done();}
@@ -54,8 +53,7 @@ function showAd(ad,resume){
     const img=document.createElement('img');img.src=ad.url;img.alt='Iklan';img.onerror=unavailable;
     if(ad.link){const a=document.createElement('a');a.href=ad.link;a.target='_blank';a.rel='noopener sponsored';a.append(img);content.append(a);}else content.append(img);
   }
-  // Image/HTML ads: the badge stays ✕; the seconds only decide when the ad auto-continues… it does not, so none.
-  let left=0;const tick=()=>{};
+  let left=Math.max(0,Number(ad.seconds)||0);const tick=()=>{if(left)count.textContent=left;else done();};tick();
   if(left)timer=setInterval(()=>{if(!document.hidden)left=Math.max(0,left-1);tick();if(!left)clearInterval(timer);},1000);
 }
 $('#start-play').onclick=()=>{if(state!=='idle')return;const gate=window.vidukAgeGate;if(gate&&!gate.done){gate.open(advance);return;}advance();};
