@@ -13,7 +13,7 @@ let toastTimer;
 function toast(message, error = false) {const t=$('#toast'); t.textContent=message; t.classList.toggle('error',error); t.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.hidden=true,7000);}
 async function copy(text) {try {await navigator.clipboard.writeText(text); toast('Berhasil disalin.');} catch {window.prompt('Salin teks berikut:',text);}}
 const videoLink = id => new URL('/?v='+encodeURIComponent(id),location.origin).href;
-function readAds() {return $$('.ad-config').map(box=>{const v=n=>$('[name="'+n+'"]',box);const o=v('opt');return {slot:box.dataset.slot,enabled:v('enabled').checked,content:v('content').value,seconds:v('seconds')?Number(v('seconds').value):0,times:v('times')?v('times').value:'',opt:o?(o.type==='checkbox'?(o.checked?'1':'0'):o.value):''};});}
+function readAds() {return $$('.ad-config').map(box=>{const v=n=>$('[name="'+n+'"]',box);const o=v('opt');return {slot:box.dataset.slot,xlink:v('xlink')?v('xlink').value:'',enabled:v('enabled').checked,content:v('content').value,seconds:v('seconds')?Number(v('seconds').value):0,times:v('times')?v('times').value:'',opt:o?(o.type==='checkbox'?(o.checked?'1':'0'):o.value):''};});}
 function readGeneral() {const f=$('#general-form');return {site_name:f.elements.site_name.value,vip_url:f.elements.vip_url.value,download:f.elements.download.checked,pretty_links:f.elements.pretty_links.checked,media_proxy:f.elements.media_proxy.checked,media_ip_lock:f.elements.media_ip_lock.checked,video_proxy:f.elements.video_proxy.value.trim(),video_proxy_hosts:f.elements.video_proxy_hosts.value.trim()};}
 $$('.ad-config').forEach(box=>{const cb=$('[name="enabled"]',box),st=$('.acc-status',box);cb.addEventListener('change',()=>{st.textContent=cb.checked?'Aktif':'Nonaktif';st.classList.toggle('on',cb.checked);$('#ads-pill').textContent=$$('.ad-config[data-ad] [name="enabled"]:checked').length+' / '+$$('.ad-config[data-ad]').length+' aktif';});});
 const openFold=id=>{const box=id&&document.getElementById(id);if(box&&box.classList.contains('fold'))box.open=true;};
@@ -53,7 +53,10 @@ $$('.folder').forEach(box=>{
 });
 const isLink=row=>row.dataset.kind==='link';
 // Keep a folder's counter and data-items in sync after rows change without reloading.
-function refreshFolder(box){if(!box)return;const ids=[...$$('.video-row',box).map(r=>r.dataset.id),...$$('.folder-item[data-missing]',box).map(m=>m.dataset.missing)];
+// A folder's manual order is kept in box.__order, so a sorted view never changes what gets saved.
+function folderOrder(box){if(!box.__order)box.__order=JSON.parse(box.dataset.items||'[]');return box.__order;}
+function refreshFolder(box){if(!box)return;const present=new Set($$('.video-row',box).map(r=>r.dataset.id));
+  const ids=[...folderOrder(box).filter(i=>present.has(i)),...$$('.folder-item[data-missing]',box).map(m=>m.dataset.missing)];
   box.dataset.items=JSON.stringify(ids);const m=$('.folder-meta',box);if(m)m.textContent=ids.length+' isi · '+(box.dataset.date||'');}
 $$('.video-row').forEach(row=>{
   $('.edit-video',row).onclick=async()=>{const title=prompt(isLink(row)?'Judul link:':'Judul video:',$('h3',row).textContent);if(title===null)return;try{await api(isLink(row)?'link_edit':'video_edit',{id:row.dataset.id,title});$('h3',row).textContent=title;row.dataset.title=title.toLowerCase();toast('Judul diperbarui.');}catch(err){toast(err.message,true);}};
@@ -88,7 +91,7 @@ $('#bulk-delete').onclick=async()=>{const items=selected();if(!items.length||!co
   syncBulk();if(done)toast(done+' item dihapus.');};
 // Thumbnail: upload an image (JPG/PNG/WebP) or paste an image link.
 const thumbInput=$('#thumb-file');let thumbRow=null;
-$$('.video-row[data-kind="video"]').forEach(row=>{$('.edit-thumb',row).onclick=()=>{let panel=$('.thumb-panel',row);if(panel){panel.remove();return;}
+$$('.video-row').forEach(row=>{if(!$('.edit-thumb',row))return;$('.edit-thumb',row).onclick=()=>{let panel=$('.thumb-panel',row);if(panel){panel.remove();return;}
   panel=document.createElement('div');panel.className='thumb-panel';panel.innerHTML='<button type="button" class="secondary">📁 Upload gambar</button><button type="button" class="secondary">🔗 Pakai link</button><span class="hint">JPG, PNG, atau WebP · maks 5 MB</span>';
   const [up,link]=$$('button',panel);up.onclick=()=>{thumbRow=row;thumbInput.click();};link.onclick=()=>setThumbLink(row);row.append(panel);};});
 async function setThumbLink(row){const url=prompt('Link gambar thumbnail (https://…), kosongkan untuk gambar bawaan:',$('img',row).getAttribute('src').startsWith('http')?$('img',row).src:'');if(url===null)return;
@@ -128,7 +131,7 @@ $$('.missing-out').forEach(btn=>btn.onclick=()=>moveItems([{id:btn.dataset.id,fr
 // Reorder inside a folder (saved immediately).
 async function saveOrder(box){try{await api('items_reorder',{id:box.dataset.id,order:JSON.parse(box.dataset.items)});}catch(err){toast(err.message,true);setTimeout(()=>location.reload(),1200);}}
 function shiftRow(row,dir){const sib=dir<0?row.previousElementSibling:row.nextElementSibling;if(!sib||!sib.classList.contains('video-row'))return;
-  if(dir<0)sib.before(row);else sib.after(row);const box=row.closest('.folder');refreshFolder(box);saveOrder(box);row.scrollIntoView({block:'nearest',behavior:'smooth'});}
+  if(dir<0)sib.before(row);else sib.after(row);const box=row.closest('.folder');box.__order=$$('.video-row',box).map(r=>r.dataset.id);refreshFolder(box);saveOrder(box);row.scrollIntoView({block:'nearest',behavior:'smooth'});}
 $$('.up-item').forEach(b=>b.onclick=()=>shiftRow(b.closest('.video-row'),-1));$$('.down-item').forEach(b=>b.onclick=()=>shiftRow(b.closest('.video-row'),1));
 $$('.pick-in-folder').forEach(b=>b.onclick=()=>{const rows=$$('.video-row',b.closest('.folder'));const on=!rows.every(r=>$('.sel',r).checked);rows.forEach(r=>{$('.sel',r).checked=on;r.classList.toggle('picked',on);});b.textContent=(on?'☑':'☐')+' Pilih semua isi';syncBulk();});
 // Bulk move.
@@ -163,26 +166,30 @@ try{const r=JSON.parse(sessionStorage.getItem('studio-reopen')||'null');sessionS
   const again=()=>{const r=$('.video-row.menu-open');if(r)place(r);};addEventListener('scroll',again,{passive:true,capture:true});addEventListener('resize',again);
 })();
 
-// View options: layout, thumbnail size and sort order of the library (remembered in this browser).
+// View options (Lihat / Sortir) for every video list: Semua video and each folder's contents.
 (()=>{
   const lib=$('#library'),btn=$('#view-btn'),panel=$('#view-panel'),list=$('.video-list');if(!lib||!btn||!panel||!list)return;
-  let v={layout:'list',thumb:'small',sort:'date',dir:'desc'};
-  try{Object.assign(v,JSON.parse(localStorage.getItem('studio-view')||'{}'));}catch{}
-  const save=()=>{try{localStorage.setItem('studio-view',JSON.stringify(v));}catch{}};
+  let v={layout:'list',thumb:'small',sort:'manual',dir:'desc'};
+  try{const old=JSON.parse(localStorage.getItem('studio-view')||'{}');if(old.layout)v.layout=old.layout;if(old.thumb)v.thumb=old.thumb;}catch{}
+  try{Object.assign(v,JSON.parse(localStorage.getItem('studio-view2')||'{}'));}catch{}
+  const save=()=>{try{localStorage.setItem('studio-view2',JSON.stringify(v));}catch{}};
   const key={title:r=>r.dataset.title||'',date:r=>Number(r.dataset.ts)||0,views:r=>Number(r.dataset.views)||0};
+  const order=(box,rows)=>{const o=folderOrder(box);return rows.sort((a,b)=>o.indexOf(a.dataset.id)-o.indexOf(b.dataset.id));};
+  const by=(rows,k,m)=>rows.sort((a,b)=>{const x=k(a),y=k(b);return (typeof x==='string'?x.localeCompare(y,'id'):x-y)*m;});
   const apply=()=>{
-    lib.classList.remove('v-list','v-grid','v-compact','t-small','t-large');lib.classList.add('v-'+v.layout,'t-'+v.thumb);
+    lib.classList.remove('v-list','v-grid','v-compact','t-small','t-large');lib.classList.add('v-'+v.layout,'t-'+v.thumb);lib.classList.toggle('sorted-view',v.sort!=='manual');
     $$('input[name=layout]',panel).forEach(i=>i.checked=i.value===v.layout);$$('input[name=thumb]',panel).forEach(i=>i.checked=i.value===v.thumb);
-    $$('.view-sort button',panel).forEach(b=>{const on=b.dataset.sort===v.sort;b.classList.toggle('on',on);$('i',b).textContent=on?(v.dir==='asc'?'▲':'▼'):'';});
-    const rows=$$(':scope > .video-row',list),k=key[v.sort],m=v.dir==='asc'?1:-1;
-    rows.sort((a,b)=>{const x=k(a),y=k(b);return (typeof x==='string'?x.localeCompare(y,'id'):x-y)*m;}).forEach(r=>list.append(r));
+    $$('.view-sort button',panel).forEach(b=>{const on=b.dataset.sort===v.sort;b.classList.toggle('on',on);const i=$('i',b);if(i)i.textContent=on&&v.sort!=='manual'?(v.dir==='asc'?'▲':'▼'):'';});
+    const m=v.dir==='asc'?1:-1;
+    // Semua video: manual = newest first. Folders: manual = the order set with Naik/Turun.
+    const rows=$$(':scope > .video-row',list);(v.sort==='manual'?by(rows,key.date,-1):by(rows,key[v.sort],m)).forEach(r=>list.append(r));
+    $$('.folder').forEach(box=>{const c=$('.folder-rows',box);if(!c)return;const rs=$$(':scope > .video-row',c);(v.sort==='manual'?order(box,rs):by(rs,key[v.sort],m)).forEach(r=>c.append(r));});
   };
   btn.addEventListener('click',()=>{panel.hidden=!panel.hidden;btn.setAttribute('aria-expanded',String(!panel.hidden));});
   panel.addEventListener('change',e=>{if(e.target.name==='layout')v.layout=e.target.value;if(e.target.name==='thumb')v.thumb=e.target.value;save();apply();});
-  $$('.view-sort button',panel).forEach(b=>b.addEventListener('click',()=>{if(v.sort===b.dataset.sort)v.dir=v.dir==='asc'?'desc':'asc';else{v.sort=b.dataset.sort;v.dir=v.sort==='title'?'asc':'desc';}save();apply();if(window.studioPaginate)window.studioPaginate(true);}));
+  $$('.view-sort button',panel).forEach(b=>b.addEventListener('click',()=>{const s=b.dataset.sort;if(s==='manual'){v.sort='manual';}else if(v.sort===s)v.dir=v.dir==='asc'?'desc':'asc';else{v.sort=s;v.dir=s==='title'?'asc':'desc';}save();apply();if(window.studioPaginate)window.studioPaginate(true);}));
   apply();
 })();
-
 // Pagination of "Semua video": 30 per page, page numbers in windows of 10. Search/sort act on the whole list first.
 (()=>{
   const list=$('.video-list'),nav=$('#pager');if(!list||!nav)return;

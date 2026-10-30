@@ -3,9 +3,9 @@
 // Content is auto-detected at render time (HTML/JS, video, image, iframe/link URL, link list).
 function adSlots(): array {
     return [
-        'preroll'=>['label'=>'Pre-roll','overlay'=>true,'hint'=>'Sebelum video diputar.'],
-        'interstitial'=>['label'=>'Interstitial (tengah video)','overlay'=>true,'times'=>true,'hint'=>'Muncul di detik yang diisi.'],
-        'pause'=>['label'=>'Pause','overlay'=>true,'hint'=>'Saat video dijeda.'],
+        'preroll'=>['label'=>'Pre-roll','overlay'=>true,'xlink'=>true,'hint'=>'Sebelum video diputar.'],
+        'interstitial'=>['label'=>'Interstitial (tengah video)','overlay'=>true,'times'=>true,'xlink'=>true,'hint'=>'Muncul di detik yang diisi.'],
+        'pause'=>['label'=>'Pause','overlay'=>true,'xlink'=>true,'hint'=>'Saat video dijeda.'],
         'top_banner'=>['label'=>'Banner atas 728x90 (Adsterra)','overlay'=>false,'hint'=>'Kode banner 728x90. Di layar kecil otomatis diperkecil, tampilan web tidak berubah.'],
         'download_banner'=>['label'=>'Banner download (300x250 / Native)','overlay'=>false,'hint'=>'Di halaman download. Ukuran mengikuti kode (standar 300x250); Native Banner menyesuaikan sendiri.'],
         'popup'=>['label'=>'Popunder / Script halaman','overlay'=>false,'hint'=>'Kode/URL script di halaman tonton.'],
@@ -18,7 +18,7 @@ function adSlots(): array {
     ];
 }
 function adDefaults(): array {
-    $r=[];foreach(adSlots() as $slot=>$m)$r[]=['slot'=>$slot,'enabled'=>false,'content'=>'','seconds'=>$slot==='pause'?0:5,'times'=>$slot==='interstitial'?'30,60':'','height'=>250,'opt'=>(string)(adSlots()[$slot]['opt']['default']??'')];
+    $r=[];foreach(adSlots() as $slot=>$m)$r[]=['slot'=>$slot,'enabled'=>false,'content'=>'','seconds'=>$slot==='pause'?0:5,'times'=>$slot==='interstitial'?'30,60':'','height'=>250,'opt'=>(string)(adSlots()[$slot]['opt']['default']??''),'xlink'=>''];
     return $r;
 }
 // Convert an old-format slot (type/url/link/html/links) to single content text.
@@ -30,6 +30,11 @@ function adLegacyContent(array $a): string {
     if($url==='')return '';
     return $link!==''?$url."\n".$link:$url;
 }
+// Direct links for the ✕ button: https only, one per line, max 10.
+function adCleanLinks(string $raw): string {
+    $out=[];foreach(preg_split('/\r\n|\r|\n|\s+/',$raw) as $l){$l=trim($l);if($l!==''&&preg_match('~^https://~i',$l)&&filter_var($l,FILTER_VALIDATE_URL))$out[$l]=1;}
+    return implode("\n",array_slice(array_keys($out),0,10));
+}
 function mergeAds(array $saved): array {
     $by=[];foreach($saved as $a)if(is_array($a)&&isset($a['slot']))$by[$a['slot']]=$a;
     foreach($by as $k=>$a)if(!array_key_exists('content',$a)){$by[$k]['content']=adLegacyContent($a);}
@@ -39,8 +44,8 @@ function mergeAds(array $saved): array {
         if($pick){$pick['slot']='preroll';$by['preroll']=$pick;}
     }
     $r=[];foreach(adDefaults() as $base){$a=$by[$base['slot']]??[];
-        $ad=$base;foreach(['enabled','content','seconds','times','height','opt'] as $k)if(array_key_exists($k,$a))$ad[$k]=$a[$k];
-        $ad['enabled']=!empty($ad['enabled']);$ad['content']=(string)$ad['content'];$ad['seconds']=(int)$ad['seconds'];$ad['times']=(string)$ad['times'];$ad['opt']=adCleanOpt($ad['slot'],(string)($ad['opt']??''));
+        $ad=$base;foreach(['enabled','content','seconds','times','height','opt','xlink'] as $k)if(array_key_exists($k,$a))$ad[$k]=$a[$k];
+        $ad['enabled']=!empty($ad['enabled']);$ad['content']=(string)$ad['content'];$ad['seconds']=(int)$ad['seconds'];$ad['times']=(string)$ad['times'];$ad['opt']=adCleanOpt($ad['slot'],(string)($ad['opt']??''));$ad['xlink']=adCleanLinks((string)($ad['xlink']??''));
         $r[]=$ad;}
     return $r;
 }
@@ -67,7 +72,7 @@ function validateAds(array $input,array $existing): array {
     }
     $r=[];foreach(mergeAds($existing) as $base){$slot=$base['slot'];if(!isset($by[$slot])){$r[]=$base;continue;}$a=$by[$slot];
         $content=trim((string)($a['content']??''));if(strlen($content)>100000)throw new RuntimeException('Isi iklan maksimal 100 KB per slot.');
-        $ad=['slot'=>$slot,'enabled'=>!empty($a['enabled']),'content'=>$content,'seconds'=>max(0,min(60,(int)($a['seconds']??$base['seconds']))),'times'=>implode(',',adTimes((string)($a['times']??$base['times']))),'height'=>$base['height'],'opt'=>adCleanOpt($slot,(string)($a['opt']??$base['opt']))];
+        $ad=['slot'=>$slot,'enabled'=>!empty($a['enabled']),'content'=>$content,'seconds'=>max(0,min(60,(int)($a['seconds']??$base['seconds']))),'times'=>implode(',',adTimes((string)($a['times']??$base['times']))),'height'=>$base['height'],'opt'=>adCleanOpt($slot,(string)($a['opt']??$base['opt'])),'xlink'=>empty($spec[$slot]['xlink'])?'':adCleanLinks((string)($a['xlink']??$base['xlink']??''))];
         if($ad['enabled']&&$slot==='head_meta'&&adCleanMeta($content)==='')throw new RuntimeException('Tidak ada tag <meta name="…" content="…"> yang valid untuk Meta verifikasi.');
         if($ad['enabled']&&$content==='')throw new RuntimeException('Isi iklan untuk '.$spec[$slot]['label'].'.');
         if($ad['enabled']&&$slot==='interstitial'&&$ad['times']==='')throw new RuntimeException('Isi detik muncul untuk Interstitial, misal 30,60.');
@@ -112,7 +117,7 @@ function adFind(array $site,string $slot): ?array {
 function adPlayerData(array $site): array {
     $r=[];foreach(['preroll','interstitial','pause'] as $slot){$ad=adFind($site,$slot);if(!$ad)continue;$p=adParse($ad['content']);if(in_array($p['kind'],['none','invalid'],true))continue;
         $kind=$p['kind']==='script'?'html':$p['kind']; // .js URL is rendered through ad.php like HTML
-        $r[]=['slot'=>$slot,'enabled'=>true,'kind'=>$kind,'url'=>$p['url'],'link'=>$p['link'],'seconds'=>(int)$ad['seconds'],'times'=>$slot==='interstitial'?adTimes($ad['times']):[]];}
+        $r[]=['slot'=>$slot,'enabled'=>true,'kind'=>$kind,'url'=>$p['url'],'link'=>$p['link'],'seconds'=>(int)$ad['seconds'],'times'=>$slot==='interstitial'?adTimes($ad['times']):[],'xlinks'=>array_values(array_filter(explode("\n",(string)($ad['xlink']??''))))];}
     return $r;
 }
 // <link rel=preconnect> for every ad host, so ads appear faster.

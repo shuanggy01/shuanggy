@@ -1,8 +1,12 @@
 <?php
 declare(strict_types=1);
 function initPostTables(): void {
-    db()->exec('CREATE TABLE IF NOT EXISTS external_links (id TEXT PRIMARY KEY,title TEXT NOT NULL,url TEXT NOT NULL,type TEXT NOT NULL,created_at INTEGER NOT NULL);
+    static $done=false;if($done)return;$done=true;
+    db()->exec('CREATE TABLE IF NOT EXISTS external_links (id TEXT PRIMARY KEY,title TEXT NOT NULL,url TEXT NOT NULL,type TEXT NOT NULL,created_at INTEGER NOT NULL,thumb_url TEXT NOT NULL DEFAULT "");
     CREATE TABLE IF NOT EXISTS collections (id TEXT PRIMARY KEY,title TEXT NOT NULL,items TEXT NOT NULL,created_at INTEGER NOT NULL);');
+    // Older databases: links get a thumbnail column.
+    $has=false;foreach(db()->query('PRAGMA table_info(external_links)') as $c)if($c['name']==='thumb_url')$has=true;
+    if(!$has)db()->exec('ALTER TABLE external_links ADD COLUMN thumb_url TEXT NOT NULL DEFAULT ""');
 }
 function extraPost(string $id): ?array {
     initPostTables();
@@ -120,7 +124,7 @@ function registerPost(string $id,string $title,string $type,string $value): arra
         }
         if($type==='video')db()->prepare('INSERT INTO videos(id,title,video_key,thumb_key,video_url,thumb_url,created_at) VALUES(?,?,?,?,?,?,?)')->execute([$id,$title,'','',$videoUrl,$thumb,time()]);
         elseif($type==='folder')db()->prepare('INSERT INTO collections VALUES(?,?,?,?)')->execute([$id,$title,json_encode($items),time()]);
-        else db()->prepare('INSERT INTO external_links VALUES(?,?,?,?,?)')->execute([$id,$title,$url,$type,time()]);
+        else db()->prepare('INSERT INTO external_links(id,title,url,type,created_at) VALUES(?,?,?,?,?)')->execute([$id,$title,$url,$type,time()]);
         db()->exec('COMMIT');return ['ok'=>true,'id'=>$id,'type'=>$type,'duplicate'=>false,'path'=>$type==='video'?postPath(['id'=>$id,'video_url'=>$videoUrl]):'/?v='.rawurlencode($id)];
     }catch(Throwable $e){db()->exec('ROLLBACK');throw $e;}
 }
@@ -144,5 +148,5 @@ function registerShort(string $seed,string $title,string $type,string $value,int
     throw new RuntimeException('Gagal membuat ID pendek unik.');
 }
 function collectionItems(array $folder): array {
-    $out=[];foreach(json_decode($folder['items'],true)??[] as $id){$v=findVideo($id);if($v){$out[]=$v;continue;}$l=extraPost($id);if($l&&$l['kind']==='link')$out[]=['id'=>$id,'title'=>$l['title'],'thumb_url'=>'assets/placeholder.svg','views'=>0];}return $out;
+    $out=[];foreach(json_decode($folder['items'],true)??[] as $id){$v=findVideo($id);if($v){$out[]=$v;continue;}$l=extraPost($id);if($l&&$l['kind']==='link')$out[]=['id'=>$id,'title'=>$l['title'],'thumb_url'=>(string)($l['thumb_url']??''),'views'=>0];}return $out;
 }

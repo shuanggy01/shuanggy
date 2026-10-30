@@ -60,7 +60,8 @@ try {
     case 'video_edit':
         $title=trim((string)($input['title']??''));if($title===''||strlen($title)>600)throw new RuntimeException('Judul tidak valid.');$q=db()->prepare('UPDATE videos SET title=? WHERE id=?');$q->execute([$title,(string)($input['id']??'')]);if(!$q->rowCount())throw new RuntimeException('Video tidak ditemukan (mungkin sudah dihapus). Muat ulang halaman.');jsonOut(['ok'=>true]);
     case 'thumb_upload':
-        $v=findVideo((string)($input['id']??''));if(!$v)throw new RuntimeException('Video tidak ditemukan.');
+        $tid=(string)($input['id']??'');$tbl='videos';$v=findVideo($tid);
+        if(!$v){$l=extraPost($tid);if(!$l||$l['kind']!=='link')throw new RuntimeException('Item tidak ditemukan.');$v=['id'=>$l['id']];$tbl='external_links';}
         $f=$_FILES['thumb']??null;if(!is_array($f)||$f['error']!==UPLOAD_ERR_OK||!is_uploaded_file($f['tmp_name']))throw new RuntimeException('Upload gagal. Pilih gambar maksimal 5 MB.');
         if($f['size']>5*1024*1024)throw new RuntimeException('Gambar maksimal 5 MB.');
         // Trust the decoded image type, never the browser-supplied name or MIME.
@@ -75,10 +76,11 @@ try {
             // Relative path: works on http/https, behind Cloudflare, and with any domain.
             $url='/thumbs/'.$name;
         }
-        db()->prepare('UPDATE videos SET thumb_url=? WHERE id=?')->execute([$url,$v['id']]);jsonOut(['ok'=>true,'thumb_url'=>$url]);
+        db()->prepare('UPDATE '.$tbl.' SET thumb_url=? WHERE id=?')->execute([$url,$v['id']]);jsonOut(['ok'=>true,'thumb_url'=>$url]);
     case 'thumb_set':
-        $v=findVideo((string)($input['id']??''));if(!$v)throw new RuntimeException('Video tidak ditemukan.');
-        $url=validUrl((string)($input['url']??''));db()->prepare('UPDATE videos SET thumb_url=? WHERE id=?')->execute([$url,$v['id']]);jsonOut(['ok'=>true,'thumb_url'=>$url]);
+        $tid=(string)($input['id']??'');$tbl='videos';$v=findVideo($tid);
+        if(!$v){$l=extraPost($tid);if(!$l||$l['kind']!=='link')throw new RuntimeException('Item tidak ditemukan.');$v=['id'=>$l['id']];$tbl='external_links';}
+        $url=validUrl((string)($input['url']??''));db()->prepare('UPDATE '.$tbl.' SET thumb_url=? WHERE id=?')->execute([$url,$v['id']]);jsonOut(['ok'=>true,'thumb_url'=>$url]);
     case 'video_delete':
         // Remove publication only. Objects are retained deliberately; no silent destructive deletion.
         $vid=(string)($input['id']??'');db()->prepare('DELETE FROM videos WHERE id=?')->execute([$vid]);purgeFromFolders([$vid]);jsonOut(['ok'=>true]);

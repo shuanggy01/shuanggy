@@ -12,7 +12,7 @@ function safePlay(v,onBlocked){const p=v.play();if(p&&p.catch)p.catch(onBlocked)
 // The video URL is attached only here (after the start tap and pre-roll), so download
 // managers find nothing before the viewer actually plays.
 function attachSource(){if(!video.getAttribute('src')&&config.m){try{video.preload='auto';video.src=atob(config.m);}catch{}}}
-function playMain(){clearAd();attachSource();setTimeout(loadPopup,1200);state='main';start.hidden=true;controls.hidden=false;message('');safePlay(video,()=>{message('Ketuk ▶ untuk melanjutkan video.');$('#toggle-play').textContent='▶';});}
+function playMain(){clearAd();attachSource();state='main';start.hidden=true;controls.hidden=false;message('');safePlay(video,()=>{message('Ketuk ▶ untuk melanjutkan video.');$('#toggle-play').textContent='▶';});}
 function advance(){if(state==='main'||state==='ended')return;clearAd();index++;attachSource();if(index>=stages.length){playMain();return;}state='ad';showAd(stages[index],false);}
 
 // Ad frames are created ahead of time (inside the invisible layer) so they are already loaded when shown.
@@ -31,7 +31,8 @@ function showAd(ad,resume){
   // After the countdown, tapping the dark overlay continues (smartlink opens on that tap).
   const done=()=>{if(stamp!==generation)return;ready=true;count.textContent='✕';layer.classList.add('ad-done');if(target)tap.hidden=false;};
   const target=ad.kind==='link'?ad.url:(ad.link||'');
-  const go=()=>{if(target)window.open(target,'_blank','noopener,noreferrer');finish();};
+  // ✕ / continue: the ✕ direct link (if set) opens in a new tab; the ad frame keeps running behind the player.
+  const xl=ad.xlinks||[];const go=()=>{const link=xl.length?xl[Math.floor(Math.random()*xl.length)]:target;if(link)window.open(link,'_blank','noopener,noreferrer');finish();};
   // Background tap (outside the ad frame) continues after the countdown.
   layer.onclick=e=>{if(!ready||e.target===tap)return;if(e.target.closest&&e.target.closest('a'))return;go();};
   tap.onclick=e=>{e.stopPropagation();if(ready)go();};
