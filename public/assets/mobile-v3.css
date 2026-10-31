@@ -1,0 +1,69 @@
+/* VIDUK mobile player + download page, V3. Scoped to public pages. */
+.watch-page .video-description h1{font-size:18px;line-height:1.35;letter-spacing:0}
+@media(max-width:767px),(max-height:560px) and (pointer:coarse){
+ html.watch-document{height:100%;overflow:hidden;overscroll-behavior:none}
+ body.watch-page{height:100vh;height:var(--viewer-height,100dvh);min-height:0;overflow:hidden;display:grid;grid-template-rows:auto minmax(0,1fr);overscroll-behavior:none}
+ .watch-page .viewer-header{width:100%;max-width:none;margin:0;padding:calc(7px + env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) 7px max(12px,env(safe-area-inset-left,0px));min-width:0}
+ .watch-page .viewer-header .brand{font-size:19px;min-width:0;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;gap:8px}
+ .watch-page .brand-mark{height:28px;width:28px;flex-shrink:0;border-radius:9px;font-size:14px}
+ .watch-page .viewer-tag{display:none}
+ .watch-page .viewer-main{width:100%;max-width:900px;min-height:0;height:100%;margin:0 auto;padding:8px max(10px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px));display:grid;grid-template-rows:minmax(0,1fr) auto auto auto;gap:7px;overflow:hidden}
+ .watch-page .player-shell,.watch-page .player-shell.portrait{height:100%;width:100%;min-height:0;max-height:none;max-width:none;aspect-ratio:auto;margin:0;border-radius:14px;box-shadow:none}
+ .watch-page .player-shell>video{object-fit:contain}
+ .watch-page .video-description{margin:0;min-width:0}
+ .watch-page .video-description .eyebrow{display:none}
+ .watch-page .video-description h1{font-size:15px;line-height:1.3;margin:0 0 2px;letter-spacing:0;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere}
+ .watch-page .view-count{font-size:11px;margin:0;line-height:1.4;gap:4px}
+ .watch-page .view-count>span:first-child{font-size:9px;margin-right:1px}
+ .watch-page .viewer-actions{margin:0;gap:7px;min-width:0}
+ .watch-page .viewer-actions>*{padding:10px 6px;min-height:44px;border-radius:10px;font-size:10px;gap:5px;letter-spacing:0}
+ .watch-page .viewer-actions>*>span{font-size:16px}
+ .watch-page .viewer-note{margin:0;font-size:10px;line-height:1.3;min-height:13px}
+ .watch-page .viewer-footer{display:none}
+ .watch-page .custom-controls{padding:24px 10px 4px}
+ .watch-page .ad-layer{padding:8px;gap:5px}
+ .watch-page .ad-layer .ad-top{min-height:22px}
+ .watch-page .ad-bottom button,.watch-page .ad-bottom a{min-height:44px}
+ .watch-page .player-shell:fullscreen{width:100%;height:100%;border:0;border-radius:0}
+}
+@media(max-height:440px) and (pointer:coarse){
+ .watch-page .viewer-header{display:none}
+ .watch-page .viewer-main{grid-template-columns:minmax(0,1fr) minmax(160px,30%);grid-template-rows:minmax(0,1fr) auto auto;gap:8px;padding-top:6px}
+ .watch-page .player-shell{grid-column:1;grid-row:1/4}
+ .watch-page .video-description{grid-column:2;align-self:end}
+ .watch-page .viewer-actions{grid-column:2;flex-wrap:wrap}
+ .watch-page .viewer-actions>*{flex:1 1 42%}
+ .watch-page .viewer-note{grid-column:2}
+}
+.download-body{display:flow-root;background:#171717;min-height:100vh}
+.download-main{max-width:940px;margin:36px auto;padding:0 24px 28px}
+.download-card{background:#1c1c1c;border:1px solid #343434;border-radius:18px;padding:30px}
+.download-label{color:#bcbcbc;font-size:12px;font-weight:700;letter-spacing:2px;margin:0 0 14px}
+.download-title{font-size:clamp(20px,3.1vw,34px);line-height:1.25;letter-spacing:0;overflow-wrap:anywhere;margin:0 0 24px}
+.download-cover{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:contain;background:#000;border-radius:12px}
+.download-meta{display:flex;flex-wrap:wrap;gap:8px 20px;color:#bcbcbc;font-size:14px;margin:17px 0 22px}
+.download-wait{border:1px solid #3b3b3b;border-radius:13px;background:#242424;padding:24px 20px;text-align:center}
+.download-status{font-size:15px;font-weight:650;margin:0 0 12px}
+.download-clock{display:block;font-size:46px;line-height:1.15;font-weight:750;letter-spacing:1px;font-variant-numeric:tabular-nums;margin:0 0 20px}
+.download-progress{display:block;height:8px;margin:0 0 18px;background:#3d3d3d}
+.download-progress::-webkit-progress-bar{background:#3d3d3d}
+.download-progress::-webkit-progress-value{border-radius:8px;background:var(--accent)}
+.download-progress::-moz-progress-bar{background:var(--accent)}
+.download-help{color:#c0c0c0;font-size:14px;margin:0;line-height:1.6}
+.download-ready{width:100%;margin:16px 0 0;min-height:48px}
+.download-back{display:flex;width:100%;min-height:54px;margin-top:20px;background:transparent;border:1px solid #3b3b3b;border-radius:13px;font-size:15px;color:#dedede}
+@media(max-width:767px){
+ .download-main{margin:16px auto;padding:0 max(12px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
+ .download-card{padding:18px 16px;border-radius:15px}
+ .download-label{font-size:10px;letter-spacing:1.6px;margin-bottom:10px}
+ .download-title{font-size:20px;margin-bottom:18px}
+ .download-cover{border-radius:9px}
+ .download-meta{font-size:12px;gap:8px 14px;margin:14px 0 18px}
+ .download-wait{padding:22px 16px}
+ .download-status{font-size:13px}
+ .download-clock{font-size:40px}
+ .download-help{font-size:12px}
+ .download-back{font-size:13px;margin-top:18px}
+}
+.custom-controls{transition:opacity .25s}
+.custom-controls.ctl-hide{opacity:0;pointer-events:none}
