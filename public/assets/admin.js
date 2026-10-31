@@ -215,3 +215,24 @@ try{const r=JSON.parse(sessionStorage.getItem('studio-reopen')||'null');sessionS
   $('#search').addEventListener('input',()=>{page=1;render();});
   render();
 })();
+
+// Pages: each menu is its own page. All sections stay in the page; only the active one is shown.
+(()=>{
+  const names=['home','videos','post','ads','account'];
+  const hashMap={library:'videos',upload:'post',ads:'ads',storage:'account',general:'account'};
+  const sheet=$('#sheet'),back=$('#sheet-backdrop'),menuBtn=$('#tab-menu');
+  const closeSheet=()=>{sheet.hidden=true;back.hidden=true;menuBtn.setAttribute('aria-expanded','false');};
+  const current=()=>{const q=new URLSearchParams(location.search).get('p');return names.includes(q)?q:(hashMap[location.hash.slice(1)]||'home');};
+  function show(p){
+    $$('[data-page-section]').forEach(s=>{s.hidden=s.dataset.pageSection!==p;if(!s.hidden)$$('.fold',s).forEach(f=>f.open=true);});
+    $$('[data-page]').forEach(a=>a.classList.toggle('selected',a.dataset.page===p));
+    document.body.dataset.page=p;closeSheet();
+  }
+  $$('.fold>summary').forEach(s=>s.addEventListener('click',e=>e.preventDefault()));
+  document.addEventListener('click',e=>{const a=e.target.closest('a[data-page]');if(!a||e.metaKey||e.ctrlKey||e.shiftKey)return;
+    e.preventDefault();const p=a.dataset.page;history.pushState({},'','?p='+p);show(p);scrollTo(0,0);});
+  addEventListener('popstate',()=>show(current()));
+  menuBtn.addEventListener('click',()=>{const open=sheet.hidden;sheet.hidden=!open;back.hidden=!open;menuBtn.setAttribute('aria-expanded',String(open));});
+  back.addEventListener('click',closeSheet);addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet();});
+  show(current());
+})();
