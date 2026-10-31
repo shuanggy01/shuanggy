@@ -13,7 +13,7 @@ if(!isset($_GET['play'])&&preg_match('/^[a-zA-Z0-9_-]{4,40}$/',(string)($_GET['v
     }
 }
 require __DIR__.'/../app/core.php';
-require ROOT.'/app/posts.php';
+require ROOT.'/app/posts.php';require ROOT.'/app/stats.php';
 $site=settings();$hasToken=array_key_exists('play',$_GET);
 $id=(string)($_GET['v']??'');$video=$hasToken?findVideoByToken((string)$_GET['play']):($id!==''?findVideo($id):null);
 if($hasToken)$id=$video?$video['id']:'invalid-play-token';
@@ -24,6 +24,7 @@ if($id!==''&&!$video&&!$extra)http_response_code(404);
 $videos=[];
 if($id===''){$inFolder=folderedIds();foreach(db()->query('SELECT * FROM videos ORDER BY created_at DESC') as $v){if(isset($inFolder[$v['id']]))continue;$videos[]=$v;if(count($videos)>=60)break;}}
 if($extra&&$extra['kind']==='folder')$videos=collectionItems($extra);
+if(http_response_code()!==404)statsTrackPage();
 ?><!doctype html><html lang="id" class="<?=$video?'watch-document':''?>"><head><meta charset="utf-8"><base href="/"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b0a12"><meta name="csrf" content="<?=h($_SESSION['csrf'])?>"><title><?=h($video?$video['title'].' · '.$site['site_name']:$site['site_name'])?></title><meta name="description" content="Tonton video pilihan di <?=h($site['site_name'])?>."><?php if($video):?><meta property="og:title" content="<?=h($video['title'])?>"><meta property="og:image" content="<?=h(thumbSource($video,$site))?>"><?php endif;?><?php if($video){videoPreconnect($video,$site);adPreconnect($site);}?><link rel="stylesheet" href="assets/style.css?v=7"><link rel="stylesheet" href="assets/mobile-v3.css?v=4"><link rel="stylesheet" href="assets/ads-v4.css?v=8"><link rel="stylesheet" href="assets/header-v5.css?v=6"><?php adHeadMeta($site);adBlockCode($site,'head');?></head><body class="viewer-body <?=$video?'watch-page':''?><?=adHasTop($site)?' has-top-ad':''?>"><header class="viewer-header promo-header"><a class="promo-cta" href="https://pejuanglendir.cc" rel="noopener"><span>cek ribuan koleksi lainnya disini</span><strong>pejuanglendir.cc</strong></a></header><?php adTopBanner($site);?>
 <main class="viewer-main">
 <?php if($video):?>
@@ -34,4 +35,4 @@ if($extra&&$extra['kind']==='folder')$videos=collectionItems($extra);
 <?php adPopup($site);adAgeGate($site);?><script src="assets/popunder-run.js?v=1" defer></script>
 <?php elseif($id!==''&&!$extra):?><div class="empty card"><h1>Video tidak ditemukan.</h1><p class="muted">Link mungkin sudah dihapus atau tidak lengkap.</p><a class="button primary" href="index.php">Kembali ke beranda</a></div>
 <?php else:?><section class="collection-intro"><p class="eyebrow">YOUR NEXT PLAY</p><h1><?php if($extra):?><?=h($extra['title'])?><?php else:?>Satu layar.<br><span>Banyak cerita.</span><?php endif;?></h1><p class="muted">Pilih video dan nikmati setiap momennya.</p></section><div class="public-grid"><?php foreach($videos as $v):?><a class="public-video" href="<?=h(postPath($v,$site))?>"><div class="cover"><img src="<?=h(thumbSource($v,$site))?>" alt="" loading="lazy"><span>▶</span></div><h2><?=h($v['title'])?></h2><p><?=number_format($v['views'])?> penayangan</p></a><?php endforeach;?></div><?php if(!$videos):?><div class="empty card"><span>▷</span><h2>Cerita pertama segera hadir.</h2><p class="muted">Belum ada video yang diterbitkan.</p></div><?php endif;endif;?>
-</main><footer class="viewer-footer"><?=h($site['site_name'])?> <span>MADE FOR YOUR SCREEN</span></footer><?php adPageEnd($site,(bool)$video);?></body></html>
+</main><script src="assets/ping.js?v=1" defer></script><footer class="viewer-footer"><?=h($site['site_name'])?> <span>MADE FOR YOUR SCREEN</span></footer><?php adPageEnd($site,(bool)$video);?></body></html>

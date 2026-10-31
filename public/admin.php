@@ -1,5 +1,5 @@
 <?php
-require __DIR__.'/../app/core.php';require ROOT.'/app/posts.php';
+require __DIR__.'/../app/core.php';require ROOT.'/app/posts.php';require ROOT.'/app/stats.php';
 $installed=(int)db()->query('SELECT count(*) FROM admins')->fetchColumn()>0;$error='';
 if($_SERVER['REQUEST_METHOD']==='POST'){
     csrf();$action=$_POST['action']??'';
@@ -40,6 +40,12 @@ $looseLinks=array_values(array_filter(db()->query('SELECT * FROM external_links 
 <aside class="sidebar"><a class="brand" href="admin.php"><span class="brand-mark">▶</span> <?=h($site['site_name'])?></a><div class="side-caption">CREATOR STUDIO</div><nav><a href="?p=home" data-page="home">▦ Beranda</a><a href="?p=videos" data-page="videos">▶ Video saya</a><a href="?p=post" data-page="post">＋ Post video / link</a><a href="?p=ads" data-page="ads">▣ Pengaturan iklan</a><a href="?p=account" data-page="account">⚙ Akun &amp; website</a></nav><div class="sidebar-bottom"><span class="live-dot"></span> PHP native · SQLite<form method="post"><input type="hidden" name="csrf" value="<?=h($_SESSION['csrf'])?>"><input type="hidden" name="action" value="logout"><button class="text-button">Keluar dari studio ↗</button></form></div></aside>
 <main class="studio"><section data-page-section="home"<?=$page=='home'?'':' hidden'?>><header class="studio-top"><div><p class="eyebrow">CREATOR STUDIO</p><h1>Ruang video abang.</h1><p class="muted">Tempel link MP4, terbitkan, dan atur pengalaman menonton.</p></div><a class="button secondary" href="index.php" target="_blank" rel="noopener">Lihat website ↗</a></header>
 <div class="stats"><div class="card"><span>Total video</span><strong><?=count($videos)?></strong></div><div class="card"><span>Penayangan</span><strong><?=number_format(array_sum(array_column($videos,'views')),0,',','.')?></strong></div><div class="card"><span>Slot iklan aktif</span><?php [$adOn,$adAll]=adCounts($site);?><strong><?=$adOn?><small> / <?=$adAll?></small></strong></div></div>
+<?php $st=statsSummary();$cmpRows=['visitors'=>'Pengunjung unik','pageviews'=>'Halaman dilihat','plays'=>'Video diputar','downloads'=>'Download'];?>
+<div class="card live-card"><div class="live-label"><span class="live-dot pulse"></span> Online sekarang</div><strong id="live-online"><?=$st['online']?></strong><small>pengunjung aktif dalam 75 detik terakhir · diperbarui otomatis</small></div>
+<div class="card cmp-card" id="cmp-card"><div class="cmp-head"><h3>Hari ini vs kemarin</h3><span class="muted" id="cmp-time"></span></div>
+<table class="cmp"><thead><tr><th></th><th>Hari ini</th><th>Kemarin</th><th>Selisih</th></tr></thead><tbody>
+<?php foreach($cmpRows as $m=>$label):?><tr data-metric="<?=$m?>"><td><?=h($label)?></td><td class="t"><?=number_format($st['today'][$m],0,',','.')?></td><td class="y"><?=number_format($st['yesterday'][$m],0,',','.')?></td><td class="d"></td></tr><?php endforeach;?>
+</tbody></table><p class="hint">Hari ini dihitung sampai saat ini, kemarin sehari penuh (zona waktu WIB). Kunjungan admin dan bot tidak dihitung.</p></div>
 <div class="home-links"><a class="card home-link" href="?p=post" data-page="post"><span>＋</span><strong>Post video / link</strong><small>Terbitkan video baru</small></a><a class="card home-link" href="?p=videos" data-page="videos"><span>▶</span><strong>Video saya</strong><small><?=count($videos)?> video · <?=count($folders)?> folder</small></a><a class="card home-link" href="?p=ads" data-page="ads"><span>▣</span><strong>Pengaturan iklan</strong><small><?=$adOn?> / <?=$adAll?> slot aktif</small></a><a class="card home-link" href="?p=account" data-page="account"><span>⚙</span><strong>Akun &amp; website</strong><small>Link VIP, Worker, password</small></a></div></section>
 <div id="toast" class="toast" role="status" hidden></div>
 <section data-page-section="post"<?=$page=='post'?'':' hidden'?>><section class="card" id="upload"><div class="section-head"><div><p class="eyebrow">01 / TERBITKAN</p><h2>Post video dari link</h2></div><span class="pill">MP4 R2</span></div>
@@ -120,5 +126,5 @@ $looseLinks=array_values(array_filter(db()->query('SELECT * FROM external_links 
 <p class="sheet-cap">PENGATURAN</p>
 <a href="?p=ads" data-page="ads">▣ Pengaturan iklan</a><a href="?p=account" data-page="account">⚙ Akun &amp; website (termasuk R2 lama)</a><a href="index.php" target="_blank" rel="noopener">↗ Lihat website</a>
 <form method="post" class="sheet-logout"><input type="hidden" name="csrf" value="<?=h($_SESSION['csrf'])?>"><input type="hidden" name="action" value="logout"><button type="submit">⎋ Keluar</button></form></div>
-<script id="site-data" type="application/json"><?=json_encode($site,JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT)?></script><script src="assets/admin.js?v=23" defer></script>
+<script id="site-data" type="application/json"><?=json_encode($site,JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT)?></script><script src="assets/admin.js?v=24" defer></script>
 <?php endif;?></body></html>

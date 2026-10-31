@@ -1,5 +1,5 @@
 <?php
-require __DIR__.'/../app/core.php';require ROOT.'/app/R2.php';
+require __DIR__.'/../app/core.php';require ROOT.'/app/R2.php';require ROOT.'/app/stats.php';
 $site=settings();$v=findVideo((string)($_GET['v']??''));
 header('Cache-Control: private, no-store, max-age=0');
 header('Referrer-Policy: same-origin');
@@ -30,6 +30,7 @@ if(isset($_GET['file'])){
     }
     // One download = one step up, counted once per ticket (a retry of the same file does not count again).
     if(empty($_SESSION['download_wait'][$id]['counted'])){$_SESSION['download_wait'][$id]['counted']=true;dlRemember(dlCount()+1);}
+    statsHit('downloads');
     session_write_close();
     $source=videoSource($v,$site);
     if(str_starts_with($source,'/media/')){header('Location: '.$source.'?download=1',true,302);exit;}
@@ -57,7 +58,7 @@ $format=strtoupper(pathinfo((string)parse_url($v['video_url'],PHP_URL_PATH),PATH
 if(!in_array($format,['MP4','WEBM','M3U8'],true))$format='VIDEO';
 session_write_close();
 ?><!doctype html>
-<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#171717"><meta name="robots" content="noindex,follow"><title>Download · <?=h($v['title'])?></title><link rel="stylesheet" href="assets/style.css"><link rel="stylesheet" href="assets/mobile-v3.css?v=3"><link rel="stylesheet" href="assets/ads-v4.css?v=8"><?php adHeadMeta($site);adBlockCode($site,'head');?></head>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#171717"><meta name="csrf" content="<?=h($_SESSION['csrf'])?>"><meta name="robots" content="noindex,follow"><title>Download · <?=h($v['title'])?></title><link rel="stylesheet" href="assets/style.css"><link rel="stylesheet" href="assets/mobile-v3.css?v=3"><link rel="stylesheet" href="assets/ads-v4.css?v=8"><?php adHeadMeta($site);adBlockCode($site,'head');?></head>
 <body class="download-body"><main class="download-main"><?php adTopBanner($site);?><article class="download-card">
 <p class="download-label">DOWNLOAD VIDEO</p>
 <h1 class="download-title"><?=h($v['title'])?></h1>
@@ -75,4 +76,4 @@ session_write_close();
 <?php adDirect($site,$id,false);?>
 <a class="button secondary direct-sponsor" href="https://t.me/Ofc_pejuanglendir01bot" target="_blank" rel="noopener">Join VIP Telegram</a>
 <a class="button download-back" href="<?=h(postPath($v,$site))?>">← Kembali ke halaman video</a>
-</article></main><?php adPopup($site);?><script src="assets/popunder-run.js?v=1" defer></script><script src="assets/download-v3.js?v=4" defer></script><?php adPageEnd($site,false);?></body></html>
+</article></main><?php adPopup($site);?><script src="assets/popunder-run.js?v=1" defer></script><script src="assets/ping.js?v=1" defer></script><script src="assets/download-v3.js?v=4" defer></script><?php adPageEnd($site,false);?></body></html>

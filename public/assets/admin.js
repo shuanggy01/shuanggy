@@ -236,3 +236,20 @@ try{const r=JSON.parse(sessionStorage.getItem('studio-reopen')||'null');sessionS
   back.addEventListener('click',closeSheet);addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet();});
   show(current());
 })();
+
+// Home: live online count + today vs yesterday (refreshed every 10 s while the Beranda page is open).
+(()=>{
+  const card=$('#cmp-card'),live=$('#live-online');if(!card||!live)return;
+  const fmt=n=>Number(n).toLocaleString('id-ID');
+  function delta(t,y){const d=$('.d',this);if(!y){d.textContent=t?'baru':'–';d.className='d '+(t?'up':'');return;}
+    const p=Math.round((t-y)/y*100);d.textContent=(p>0?'▲ +':p<0?'▼ ':'= ')+(p?p+'%':'0%');d.className='d '+(p>0?'up':p<0?'down':'');}
+  function render(s){
+    live.textContent=fmt(s.online);
+    $$('#cmp-card tr[data-metric]').forEach(tr=>{const m=tr.dataset.metric,t=s.today[m]||0,y=s.yesterday[m]||0;$('.t',tr).textContent=fmt(t);$('.y',tr).textContent=fmt(y);delta.call(tr,t,y);});
+    $('#cmp-time').textContent='diperbarui '+new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  }
+  async function refresh(){if(document.hidden||document.body.dataset.page!=='home')return;try{render(await api('stats'));}catch{}}
+  $$('#cmp-card tr[data-metric]').forEach(tr=>delta.call(tr,Number($('.t',tr).textContent.replace(/\D/g,'')),Number($('.y',tr).textContent.replace(/\D/g,''))));
+  setInterval(refresh,10000);document.addEventListener('visibilitychange',refresh);addEventListener('popstate',()=>setTimeout(refresh,50));
+  $$('a[data-page=home]').forEach(a=>a.addEventListener('click',()=>setTimeout(refresh,50)));
+})();

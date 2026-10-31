@@ -197,3 +197,18 @@
  .sheet-logout{margin:10px 0 0;border-top:1px solid var(--line);padding-top:6px}
  .sheet-logout button{width:100%;justify-content:flex-start;background:transparent;color:#ff6b7f;font-size:16px;padding:14px 8px}
 }
+
+/* Home: live + comparison */
+.live-card{display:grid;gap:4px;margin-bottom:16px;padding:18px 22px}
+.live-label{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.live-card strong{font-size:44px;line-height:1;letter-spacing:-1.5px;color:#6ad8ae}
+.live-card small{font-size:11px;color:var(--muted)}
+.live-dot.pulse{animation:livepulse 1.6s ease-in-out infinite;margin:0}
+@keyframes livepulse{0%,100%{box-shadow:0 0 0 0 #6ad8ae80}50%{box-shadow:0 0 0 7px #6ad8ae00}}
+.cmp-card{margin-bottom:16px;padding:18px 20px}
+.cmp-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:8px}.cmp-head h3{margin:0}.cmp-head span{font-size:11px}
+.cmp{width:100%;border-collapse:collapse;font-size:13px}
+.cmp th{font-size:11px;color:var(--muted);font-weight:600;text-align:right;padding:6px 4px}.cmp th:first-child,.cmp td:first-child{text-align:left}
+.cmp td{padding:10px 4px;border-top:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+.cmp td.t{font-weight:700}.cmp td.d{font-size:12px;white-space:nowrap;color:var(--muted)}
+.cmp td.d.up{color:#6ad8ae}.cmp td.d.down{color:#ff869d}

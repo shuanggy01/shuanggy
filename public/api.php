@@ -1,7 +1,7 @@
 <?php
 require __DIR__.'/../app/core.php';
 require ROOT.'/app/R2.php';
-require ROOT.'/app/posts.php';
+require ROOT.'/app/posts.php';require ROOT.'/app/stats.php';
 if($_SERVER['REQUEST_METHOD']!=='POST')fail('Gunakan POST.',405);
 csrf();
 // Thumbnail uploads arrive as multipart form data; everything else is JSON.
@@ -10,11 +10,13 @@ $action=(string)($input['action']??'');
 try {
     if($action==='view') {
         $id=(string)($input['id']??'');if(!findVideo($id))fail('Video tidak ditemukan.',404);
-        if(time()-(int)($_SESSION['view_'.$id]??0)>1800){db()->prepare('UPDATE videos SET views=views+1 WHERE id=?')->execute([$id]);$_SESSION['view_'.$id]=time();}
+        if(time()-(int)($_SESSION['view_'.$id]??0)>1800){db()->prepare('UPDATE videos SET views=views+1 WHERE id=?')->execute([$id]);$_SESSION['view_'.$id]=time();statsHit('plays');}
         jsonOut(['ok'=>true]);
     }
+    if($action==='ping'){statsOnlineTouch();jsonOut(['ok'=>true]);}
     requireAdmin();
     switch($action) {
+    case 'stats':jsonOut(statsSummary());
     case 'settings':
         $site=settings();$site['site_name']=substr(trim((string)($input['site_name']??'Layar')),0,80)?:'Layar';$site['vip_url']=validUrl((string)($input['vip_url']??''));$site['download']=!empty($input['download']);
         foreach(['pretty_links','media_proxy','media_ip_lock'] as $flag)if(array_key_exists($flag,$input))$site[$flag]=!empty($input[$flag]);
