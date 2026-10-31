@@ -3,7 +3,7 @@
 // Content is auto-detected at render time (HTML/JS, video, image, iframe/link URL, link list).
 function adSlots(): array {
     return [
-        'preroll'=>['label'=>'Pre-roll','overlay'=>true,'xlink'=>true,'hint'=>'Sebelum video diputar.'],
+        'preroll'=>['label'=>'Pre-roll (tidak dipakai)','overlay'=>true,'xlink'=>true,'hint'=>'Sudah diganti Popunder yang aktif saat tombol ▶ ditekan. Kolom ini diabaikan.'],
         'interstitial'=>['label'=>'Interstitial (tengah video)','overlay'=>true,'times'=>true,'xlink'=>true,'hint'=>'Muncul di detik yang diisi.'],
         'pause'=>['label'=>'Pause','overlay'=>true,'xlink'=>true,'hint'=>'Saat video dijeda.'],
         'top_banner'=>['label'=>'Banner atas 728x90 (Adsterra)','overlay'=>false,'hint'=>'Kode banner 728x90. Di layar kecil otomatis diperkecil, tampilan web tidak berubah.'],
@@ -115,7 +115,7 @@ function adFind(array $site,string $slot): ?array {
 }
 // Data sent to the player (raw HTML stays server-side, served by ad.php).
 function adPlayerData(array $site): array {
-    $r=[];foreach(['preroll','interstitial','pause'] as $slot){$ad=adFind($site,$slot);if(!$ad)continue;$p=adParse($ad['content']);if(in_array($p['kind'],['none','invalid'],true))continue;
+    $r=[];foreach(['interstitial','pause'] as $slot){$ad=adFind($site,$slot);if(!$ad)continue;$p=adParse($ad['content']);if(in_array($p['kind'],['none','invalid'],true))continue;
         $kind=$p['kind']==='script'?'html':$p['kind']; // .js URL is rendered through ad.php like HTML
         $r[]=['slot'=>$slot,'enabled'=>true,'kind'=>$kind,'url'=>$p['url'],'link'=>$p['link'],'seconds'=>(int)$ad['seconds'],'times'=>$slot==='interstitial'?adTimes($ad['times']):[],'xlinks'=>array_values(array_filter(explode("\n",(string)($ad['xlink']??''))))];}
     return $r;

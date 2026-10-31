@@ -2,7 +2,8 @@
 (() => {
 const $ = s => document.querySelector(s);
 const config=JSON.parse($('#player-data').textContent),video=$('#main-video'),shell=$('#player-shell'),layer=$('#ad-layer'),content=$('#ad-content'),count=$('#ad-count'),frames=$('#ad-frames'),tap=$('#ad-tap'),controls=$('#custom-controls'),start=$('#start-screen');
-const ads=(config.ads||[]).filter(a=>a.enabled);const stages=ads.filter(a=>a.slot==='preroll');const pauseAd=ads.find(a=>a.slot==='pause');const inter=ads.find(a=>a.slot==='interstitial');const interFired={};
+const ads=(config.ads||[]).filter(a=>a.enabled);const stages=[]; // pre-roll is replaced by the popunder (starts at the first tap)
+const pauseAd=ads.find(a=>a.slot==='pause');const inter=ads.find(a=>a.slot==='interstitial');const interFired={};
 let state='idle',index=-1,timer=null,watchdog=null,adVideo=null,viewSent=false,adCleanup=()=>{},generation=0;
 video.controls=false;start.hidden=false;
 if(document.readyState==='complete')preload();else addEventListener('load',preload,{once:true});
@@ -71,7 +72,13 @@ shell.addEventListener('pointermove',e=>{if(e.pointerType==='mouse')ctlWake();})
 video.addEventListener('play',ctlWake);video.addEventListener('playing',ctlWake);
 ['pause','ended','waiting'].forEach(t=>video.addEventListener(t,ctlShow));
 function toggle(){if(state!=='main'&&state!=='ended')return;if(video.paused){if(state==='ended'){state='main';video.currentTime=0;}message('');safePlay(video,()=>message('Video belum bisa diputar. Coba lagi.'));}else video.pause();}
-$('#toggle-play').onclick=toggle;video.addEventListener('click',()=>{if(state==='idle')$('#start-play').click();else if(!revealed)toggle();});
+$('#toggle-play').onclick=toggle;// Tapping the screen no longer pauses (only the pause icon does). Double tap: right side +10 s, left side -10 s (keep tapping to repeat).
+let lastTap=0,lastSide=0,hintTimer=null;const hint=document.createElement('div');hint.className='seek-hint';hint.hidden=true;shell.append(hint);
+function seekBy(d){if(!Number.isFinite(video.duration))return;video.currentTime=Math.max(0,Math.min(video.duration,video.currentTime+d));
+  hint.textContent=d<0?'⏪ 10 dtk':'10 dtk ⏩';hint.className='seek-hint '+(d<0?'left':'right');hint.hidden=false;clearTimeout(hintTimer);hintTimer=setTimeout(()=>{hint.hidden=true;},700);}
+video.addEventListener('click',e=>{if(state==='idle'){$('#start-play').click();return;}if(state!=='main'&&state!=='ended')return;
+  const r=video.getBoundingClientRect(),side=e.clientX-r.left<r.width/2?-1:1,now=Date.now();
+  if(now-lastTap<350&&side===lastSide)seekBy(side*10);lastTap=now;lastSide=side;});
 video.addEventListener('play',()=>{if(!['main','ended'].includes(state)){video.pause();return;}state='main';$('#toggle-play').textContent='Ⅱ';$('#toggle-play').setAttribute('aria-label','Jeda');message('');});
 video.addEventListener('pause',()=>{if(state!=='main')return;$('#toggle-play').textContent='▶';$('#toggle-play').setAttribute('aria-label','Putar');if(pauseAd&&!video.ended){state='pause';showAd(pauseAd,true);}});
 video.addEventListener('ended',()=>{clearAd();state='ended';controls.hidden=false;$('#toggle-play').textContent='↻';$('#toggle-play').setAttribute('aria-label','Putar ulang');});

@@ -212,3 +212,8 @@
 .cmp td{padding:10px 4px;border-top:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
 .cmp td.t{font-weight:700}.cmp td.d{font-size:12px;white-space:nowrap;color:var(--muted)}
 .cmp td.d.up{color:#6ad8ae}.cmp td.d.down{color:#ff869d}
+
+/* Double-tap seek hint */
+.player-shell{touch-action:manipulation}
+.seek-hint{position:absolute;top:50%;transform:translateY(-50%);z-index:4;padding:12px 18px;border-radius:30px;background:#000b;color:#fff;font:700 15px system-ui,sans-serif;pointer-events:none}
+.seek-hint.left{left:12%}.seek-hint.right{right:12%}
