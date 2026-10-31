@@ -71,16 +71,26 @@ shell.addEventListener('pointerdown',e=>{revealed=controls.classList.contains('c
 shell.addEventListener('pointermove',e=>{if(e.pointerType==='mouse')ctlWake();});
 video.addEventListener('play',ctlWake);video.addEventListener('playing',ctlWake);
 ['pause','ended','waiting'].forEach(t=>video.addEventListener(t,ctlShow));
-function toggle(){if(state!=='main'&&state!=='ended')return;if(video.paused){if(state==='ended'){state='main';video.currentTime=0;}message('');safePlay(video,()=>message('Video belum bisa diputar. Coba lagi.'));}else video.pause();}
+function toggle(){if(state!=='main'&&state!=='ended')return;if(video.paused){if(state==='ended'){state='main';video.currentTime=0;}message('');userPaused=false;safePlay(video,()=>message('Video belum bisa diputar. Coba lagi.'));}else{userPaused=true;video.pause();}}
 $('#toggle-play').onclick=toggle;// Tapping the screen no longer pauses (only the pause icon does). Double tap: right side +10 s, left side -10 s (keep tapping to repeat).
 let lastTap=0,lastSide=0,hintTimer=null;const hint=document.createElement('div');hint.className='seek-hint';hint.hidden=true;shell.append(hint);
 function seekBy(d){if(!Number.isFinite(video.duration))return;video.currentTime=Math.max(0,Math.min(video.duration,video.currentTime+d));
   hint.textContent=d<0?'⏪ 10 dtk':'10 dtk ⏩';hint.className='seek-hint '+(d<0?'left':'right');hint.hidden=false;clearTimeout(hintTimer);hintTimer=setTimeout(()=>{hint.hidden=true;},700);}
-video.addEventListener('click',e=>{if(state==='idle'){$('#start-play').click();return;}if(state!=='main'&&state!=='ended')return;
+// Taps are read at the very top of the page (capture), so scripts on the page cannot swallow them.
+function onTap(e){
+  if(!shell.contains(e.target)||e.target.closest('#custom-controls,#ad-layer,.start-screen,.player-message,button,a'))return;
+  if(state==='idle'){return;}if(state!=='main'&&state!=='ended')return;
   const r=video.getBoundingClientRect(),side=e.clientX-r.left<r.width/2?-1:1,now=Date.now();
-  if(now-lastTap<350&&side===lastSide)seekBy(side*10);lastTap=now;lastSide=side;});
+  if(now-lastTap<350&&side===lastSide)seekBy(side*10);lastTap=now;lastSide=side;}
+window.addEventListener('pointerup',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;onTap(e);},true);
+video.addEventListener('click',()=>{if(state==='idle')$('#start-play').click();});
+// No long-press / right-click menu on the video (no "Download video" there): downloads only via the Unduh button.
+shell.addEventListener('contextmenu',e=>e.preventDefault());
+// Some browsers pause the video when another tab (e.g. a popunder) takes over; resume it unless the viewer paused it.
+let userPaused=false,wasPlaying=false;
+document.addEventListener('visibilitychange',()=>{if(document.hidden){wasPlaying=state==='main'&&!video.paused;}else if(wasPlaying&&!userPaused&&video.paused&&state==='main')safePlay(video,()=>{});});
 video.addEventListener('play',()=>{if(!['main','ended'].includes(state)){video.pause();return;}state='main';$('#toggle-play').textContent='Ⅱ';$('#toggle-play').setAttribute('aria-label','Jeda');message('');});
-video.addEventListener('pause',()=>{if(state!=='main')return;$('#toggle-play').textContent='▶';$('#toggle-play').setAttribute('aria-label','Putar');if(pauseAd&&!video.ended){state='pause';showAd(pauseAd,true);}});
+video.addEventListener('pause',()=>{if(state!=='main')return;$('#toggle-play').textContent='▶';$('#toggle-play').setAttribute('aria-label','Putar');if(pauseAd&&!video.ended&&userPaused){state='pause';showAd(pauseAd,true);}});
 video.addEventListener('ended',()=>{clearAd();state='ended';controls.hidden=false;$('#toggle-play').textContent='↻';$('#toggle-play').setAttribute('aria-label','Putar ulang');});
 video.addEventListener('error',()=>{if(state==='ad'||state==='idle'){video.removeAttribute('src');video.load();return;}clearAd();state='main';start.hidden=true;controls.hidden=false;message('Video tidak dapat dimuat. Periksa koneksi atau coba buka kembali link ini.');});
 video.addEventListener('waiting',()=>{if(state==='main')message('Memuat video…');});video.addEventListener('playing',()=>message(''));
